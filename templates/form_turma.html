@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">{{ titulo }}</h1>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="POST" action="">
+            <div class="mb-3">
+                <label for="nome_turma" class="form-label">Nome da Turma</label>
+                <input type="text" class="form-control" id="nome_turma" name="nome_turma" value="{{ turma.nome_turma if turma else '' }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="descricao" class="form-label">Descrição</label>
+                <textarea class="form-control" id="descricao" name="descricao" rows="3">{{ turma.descricao if turma else '' }}</textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="data_inicio" class="form-label">Data de Início</label>
+                    <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ turma.data_inicio.strftime('%Y-%m-%d') if turma and turma.data_inicio else '' }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="data_fim" class="form-label">Data de Fim</label>
+                    <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ turma.data_fim.strftime('%Y-%m-%d') if turma and turma.data_fim else '' }}">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="Planejamento" {% if turma and turma.status == 'Planejamento' %}selected{% endif %}>Planejamento</option>
+                        <option value="Ativa" {% if turma and turma.status == 'Ativa' %}selected{% endif %}>Ativa</option>
+                        <option value="Concluída" {% if turma and turma.status == 'Concluída' %}selected{% endif %}>Concluída</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="monitores" class="form-label">Monitores</label>
+                <select class="form-select" id="monitores" name="monitores" multiple size="5">
+                    {% for monitor in monitores_disponiveis %}
+                        <option value="{{ monitor.id }}" {% if turma and monitor in turma.monitores %}selected{% endif %}>
+                            {{ monitor.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">Segure Ctrl (ou Cmd no Mac) para selecionar mais de um.</div>
+            </div>
+            
+            <hr>
+
+            <div class="d-flex justify-content-end">
+                <a href="{{ url_for('lista_turmas') }}" class="btn btn-secondary me-2">Cancelar</a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-circle"></i> Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

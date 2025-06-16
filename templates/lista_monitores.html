@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}Monitores Cadastrados{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Gerenciar Monitores</h1>
+    <a href="{{ url_for('novo_monitor') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Cadastrar Novo Monitor
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Email</th>
+                        <th>Perfil / Especialidade</th>
+                        <th class="text-end">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for monitor in monitores %}
+                    <tr>
+                        <td><strong>{{ monitor.nome }}</strong></td>
+                        <td>{{ monitor.email }}</td>
+                        <td><span class="badge bg-secondary">{{ monitor.perfil }}</span></td>
+                        <td class="text-end">
+                            <a href="{{ url_for('editar_monitor', id=monitor.id) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil-square"></i> Editar
+                            </a>
+                            <!-- O formulário de remoção com confirmação JavaScript -->
+                            <form action="{{ url_for('deletar_monitor', id=monitor.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este monitor? Essa ação não pode ser desfeita.');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-trash"></i> Remover
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center p-4">Nenhum monitor cadastrado ainda.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

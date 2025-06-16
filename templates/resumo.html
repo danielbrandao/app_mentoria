@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+
+{% block title %}Resumo dos Dados{% endblock %}
+
+{% block content %}
+<h1 class="mb-4 display-6">📊 Resumo dos Dados</h1>
+
+<div class="row g-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header">
+                <h3><i class="bi bi-briefcase-fill"></i> Por Desafio</h3>
+            </div>
+            <div class="card-body">
+                {% for desafio, data in resumo_desafio.items() %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>{{ desafio }}</span>
+                            <span><strong>{{ data.total }}</strong></span>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar" role="progressbar" style="width: {{ data.pct }}%;" aria-valuenow="{{ data.pct }}" aria-valuemin="0" aria-valuemax="100">{{ "%.1f"|format(data.pct) }}%</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header">
+                <h3><i class="bi bi-clock-fill"></i> Por Disponibilidade</h3>
+            </div>
+            <div class="card-body">
+                {% for disp, data in resumo_disponibilidade.items() %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>{{ disp }}</span>
+                            <span><strong>{{ data.total }}</strong></span>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ data.pct }}%;" aria-valuenow="{{ data.pct }}" aria-valuemin="0" aria-valuemax="100">{{ "%.1f"|format(data.pct) }}%</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header">
+                <h3><i class="bi bi-people-fill"></i> Por Perfil</h3>
+            </div>
+            <div class="card-body">
+                {% for perfil, data in resumo_perfil.items() %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>{{ perfil }}</span>
+                            <span><strong>{{ data.total }}</strong></span>
+                        </div>
+                        <div class="progress" style="height: 20px;">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ data.pct }}%;" aria-valuenow="{{ data.pct }}" aria-valuemin="0" aria-valuemax="100">{{ "%.1f"|format(data.pct) }}%</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
