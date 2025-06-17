@@ -10,6 +10,45 @@
     </div>
     <a href="{{ url_for('lista_turmas') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar para Turmas</a>
 </div>
+<!-- NOVA SEÇÃO PARA GERENCIAR AVISOS -->
+<div class="row">
+    <div class="row g-5">
+        <h3>Avisos da Turma</h3>
+        <div class="list-group">
+            {% for aviso in turma.avisos|sort(attribute='data_publicacao', reverse=True) %}
+            <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ aviso.titulo }}</h5>
+                    <form action="{{ url_for('deletar_aviso', id=aviso.id) }}" method="POST" onsubmit="return confirm('Tem certeza?');">
+                        <button type="submit" class="btn-close" aria-label="Close"></button>
+                    </form>
+                </div>
+                <p class="mb-1">{{ aviso.conteudo }}</p>
+                <small>Publicado em: {{ aviso.data_publicacao.strftime('%d/%m/%Y') }}</small>
+            </div>
+            {% else %}
+            <div class="list-group-item">Nenhum aviso publicado.</div>
+            {% endfor %}
+        </div>
+    <div >
+        <h3>Publicar Novo Aviso</h3>
+        <div class="card">
+            <div class="card-body">
+                <form action="{{ url_for('novo_aviso', turma_id=turma.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label for="titulo" class="form-label">Título</label>
+                        <input type="text" name="titulo" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="conteudo" class="form-label">Conteúdo do Aviso</label>
+                        <textarea name="conteudo" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Publicar Aviso</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 <hr>
 
 <!-- Seção de Encontros -->
@@ -66,6 +105,8 @@
 
 <!-- NOVA SEÇÃO: GERENCIAMENTO DE MENTORADOS -->
 <div class="row g-5">
+    <hr class="my-5">
+
     <!-- Coluna 1: Mentorados na Turma -->
     <div class="col-md-6">
         <h3>Mentorados na Turma ({{ turma.mentorados.count() }})</h3>

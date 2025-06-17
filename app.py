@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from collections import Counter
 from datetime import datetime
 import secrets
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 # --- CONFIGURAÇÃO DA APLICAÇÃO E DO BANCO DE DADOS ---
@@ -18,12 +20,24 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+# --- CONFIGURAÇÃO DO FLASK-LOGIN ---
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login' # Redireciona usuários não logados para a rota /login
+login_manager.login_message = "Por favor, faça o login para acessar esta página."
+login_manager.login_message_category = "info"
+
 # --- MODELS (REPRESENTAÇÃO DAS TABELAS DO BANCO DE DADOS) ---
 
 # Tabela de Associação Muitos-para-Muitos: conecta Turmas e Monitores.
 turma_monitores = db.Table('turma_monitores',
     db.Column('turma_id', db.Integer, db.ForeignKey('turmas.id'), primary_key=True),
     db.Column('monitor_id', db.Integer, db.ForeignKey('monitores.id'), primary_key=True)
+)
+
+turma_modulos = db.Table('turma_modulos',
+    db.Column('turma_id', db.Integer, db.ForeignKey('turmas.id'), primary_key=True),
+    db.Column('modulo_id', db.Integer, db.ForeignKey('modulos.id'), primary_key=True)
 )
 
 class Turmas(db.Model):
@@ -41,6 +55,10 @@ class Turmas(db.Model):
     encontros = db.relationship('Encontros', backref='turma', lazy=True, cascade="all, delete-orphan")
     monitores = db.relationship('Monitores', secondary=turma_monitores, lazy='subquery',
         back_populates='turmas')
+    modulos = db.relationship('Modulos', secondary=turma_modulos, lazy='subquery',
+        backref=db.backref('turmas', lazy=True))
+    avisos = db.relationship('Avisos', backref='turma', lazy=True, cascade="all, delete-orphan")
+
 
 class Monitores(db.Model):
     __tablename__ = 'monitores'
@@ -55,11 +73,13 @@ class Monitores(db.Model):
         back_populates='monitores')
     encontros_liderados = db.relationship('Encontros', backref='monitor', lazy=True)
 
-class Registros(db.Model):
+class Registros(db.Model, UserMixin): # Adiciona UserMixin
     __tablename__ = 'registros'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128)) # Campo para senha criptografada
+    is_admin = db.Column(db.Boolean, default=False)
     fone = db.Column(db.String(20))
     perfil = db.Column(db.String(100))
     desafio = db.Column(db.String(100))
@@ -71,7 +91,12 @@ class Registros(db.Model):
     # NOVOS CAMPOS
     token_matricula = db.Column(db.String(32), unique=True, nullable=True)
     plano_escolhido = db.Column(db.String(50), nullable=True)
-    # Adicione outros campos que você queira no formulário completo aqui
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
     
     turma_id = db.Column(db.Integer, db.ForeignKey('turmas.id'))
 
@@ -87,42 +112,53 @@ class Encontros(db.Model):
     turma_id = db.Column(db.Integer, db.ForeignKey('turmas.id'), nullable=False)
     monitor_id = db.Column(db.Integer, db.ForeignKey('monitores.id'), nullable=False)
 
+class Modulos(db.Model):
+    __tablename__ = 'modulos'
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(150), nullable=False)
+    descricao = db.Column(db.Text)
+    ordem = db.Column(db.Integer, default=0)
+    thumbnail_url = db.Column(db.String(255))
+    conteudos = db.relationship('Conteudos', backref='modulo', lazy=True, cascade="all, delete-orphan")
+
+# NOVO MODEL: Conteudos
+class Conteudos(db.Model):
+    __tablename__ = 'conteudos'
+    id = db.Column(db.Integer, primary_key=True)
+    modulo_id = db.Column(db.Integer, db.ForeignKey('modulos.id'), nullable=False)
+    titulo = db.Column(db.String(150), nullable=False)
+    tipo = db.Column(db.String(50)) # 'Vídeo', 'PDF', 'Link'
+    url_conteudo = db.Column(db.String(255), nullable=False)
+    descricao = db.Column(db.Text)
+    ordem = db.Column(db.Integer, default=0)
+
+class Avisos(db.Model):
+    __tablename__ = 'avisos'
+    id = db.Column(db.Integer, primary_key=True)
+    turma_id = db.Column(db.Integer, db.ForeignKey('turmas.id'), nullable=False)
+    titulo = db.Column(db.String(150), nullable=False)
+    conteudo = db.Column(db.Text, nullable=False)
+    data_publicacao = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 # --- ROTAS DA APLICAÇÃO ---
 
+@login_manager.user_loader
+def load_user(user_id):
+    return Registros.query.get(int(user_id))
+
 @app.route('/')
+@login_required # Garante que só usuários logados acessem a raiz do site
 def index():
     """
-    Página principal que lista os inscritos com filtros.
+    Rota principal que atua como um portão de entrada, redirecionando
+    o usuário para o dashboard correto com base em seu perfil.
     """
-    query = Registros.query
-    
-    filtro_perfil = request.args.get('perfil', '')
-    filtro_desafio = request.args.get('desafio', '')
-    filtro_disponibilidade = request.args.get('disponibilidade', '')
+    if current_user.is_admin:
+        return redirect(url_for('admin_dashboard'))
+    else:
+        return redirect(url_for('area_membros'))
 
-    if filtro_perfil:
-        query = query.filter(Registros.perfil == filtro_perfil)
-    if filtro_desafio:
-        query = query.filter(Registros.desafio == filtro_desafio)
-    if filtro_disponibilidade:
-        query = query.filter(Registros.disponibilidade.like(f'%{filtro_disponibilidade}%'))
-
-    dados_filtrados = query.order_by(Registros.data_inscricao.desc()).all()
-    
-    perfis_opcoes = sorted([p[0] for p in db.session.query(Registros.perfil).distinct().all() if p[0]])
-    desafios_opcoes = sorted([d[0] for d in db.session.query(Registros.desafio).distinct().all() if d[0]])
-    disponibilidades_opcoes = ['Manhã', 'Tarde', 'Noite', 'Fim de semana']
-    
-    filtros_ativos = {
-        'perfil': filtro_perfil,
-        'desafio': filtro_desafio,
-        'disponibilidade': filtro_disponibilidade
-    }
-
-    return render_template('index.html', dados=dados_filtrados, total=len(dados_filtrados),
-                           perfis=perfis_opcoes, desafios=desafios_opcoes,
-                           disponibilidades=disponibilidades_opcoes, filtros_ativos=filtros_ativos)
 
 @app.route('/detalhe/<int:id>')
 def detalhe(id):
@@ -432,7 +468,220 @@ def confirmar_matricula(token):
 
     return render_template('form_matricula.html', titulo="Confirmar Matrícula", registro=registro)
 
+## Auth e Member area
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('area_membros'))
+    if request.method == 'POST':
+        user = Registros.query.filter_by(email=request.form['email']).first()
+        if user and user.check_password(request.form['password']):
+            login_user(user, remember=request.form.get('remember'))
+            return redirect(url_for('area_membros'))
+        else:
+            flash('Login inválido. Verifique seu e-mail e senha.', 'danger')
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required # Garante que apenas usuários logados possam acessar esta rota
+def logout():
+    logout_user() # Função do Flask-Login que limpa a sessão do usuário
+    flash("Você saiu da sua conta com sucesso.", "info")
+    return redirect(url_for('login')) # Redireciona para a página de login
+
+@app.route('/area-membros')
+@login_required # Esta linha protege a rota!
+def area_membros():
+    """
+    Dashboard principal do mentorado. Exibe o progresso
+    e os módulos de conteúdo aos quais ele tem acesso.
+    """
+    # Pega a turma do usuário logado (current_user é disponibilizado pelo Flask-Login)
+    turma_do_aluno = current_user.turma
+    modulos_da_turma = []
+    progresso_percent = 0
+
+    if turma_do_aluno:
+        # Pega os módulos associados à turma, ordenados pela coluna 'ordem'
+        modulos_da_turma = sorted(turma_do_aluno.modulos, key=lambda m: m.ordem)
+        
+        # Lógica para calcular o progresso da mentoria
+        hoje = datetime.utcnow().date()
+        inicio = turma_do_aluno.data_inicio
+        fim = turma_do_aluno.data_fim
+
+        if inicio and fim and hoje >= inicio:
+            if hoje >= fim:
+                progresso_percent = 100
+            else:
+                duracao_total = (fim - inicio).days
+                dias_passados = (hoje - inicio).days
+                if duracao_total > 0:
+                    progresso_percent = round((dias_passados / duracao_total) * 100)
+    
+    return render_template('area_membros.html', 
+                           modulos=modulos_da_turma, 
+                           progresso=progresso_percent)
+
+# --- ROTAS DO PAINEL DE ADMINISTRAÇÃO ---
+
+# Função decoradora para proteger rotas de admin
+from functools import wraps
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not current_user.is_admin:
+            flash("Acesso não autorizado. Esta área é restrita para administradores.", "danger")
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    """Página principal do painel de administração."""
+    return render_template('admin/admin_dashboard.html')
+
+
+@app.route('/admin/modulos')
+@admin_required
+def lista_modulos():
+    """Lista todos os módulos para gerenciamento."""
+    modulos = Modulos.query.order_by(Modulos.ordem).all()
+    return render_template('admin/lista_modulos.html', modulos=modulos)
+
+
+@app.route('/admin/modulos/novo', methods=['GET', 'POST'])
+@admin_required
+def novo_modulo():
+    """Formulário para criar um novo módulo."""
+    if request.method == 'POST':
+        novo = Modulos(
+            titulo=request.form['titulo'],
+            descricao=request.form['descricao'],
+            ordem=int(request.form['ordem']),
+            thumbnail_url=request.form['thumbnail_url']
+        )
+        db.session.add(novo)
+        db.session.commit()
+        flash('Módulo criado com sucesso!', 'success')
+        return redirect(url_for('lista_modulos'))
+    return render_template('admin/form_modulo.html', titulo="Criar Novo Módulo")
+
+
+@app.route('/admin/modulos/editar/<int:id>', methods=['GET', 'POST'])
+@admin_required
+def editar_modulo(id):
+    """Formulário para editar um módulo existente."""
+    modulo = Modulos.query.get_or_404(id)
+    if request.method == 'POST':
+        modulo.titulo = request.form['titulo']
+        modulo.descricao = request.form['descricao']
+        modulo.ordem = int(request.form['ordem'])
+        modulo.thumbnail_url = request.form['thumbnail_url']
+        db.session.commit()
+        flash('Módulo atualizado com sucesso!', 'success')
+        return redirect(url_for('lista_modulos'))
+    return render_template('admin/form_modulo.html', titulo="Editar Módulo", modulo=modulo)
+
+
+@app.route('/admin/modulos/deletar/<int:id>', methods=['POST'])
+@admin_required
+def deletar_modulo(id):
+    """Deleta um módulo."""
+    modulo = Modulos.query.get_or_404(id)
+    db.session.delete(modulo)
+    db.session.commit()
+    flash('Módulo removido com sucesso!', 'danger')
+    return redirect(url_for('lista_modulos'))
+
+@app.route('/admin/registro/<int:id>/definir-senha', methods=['GET', 'POST'])
+@admin_required # Protege a rota para que apenas admins possam acessá-la
+def definir_senha_mentorado(id):
+    """
+    Página de administração para definir a senha de um mentorado.
+    """
+    mentorado = Registros.query.get_or_404(id)
+    if request.method == 'POST':
+        senha = request.form.get('senha')
+        confirmacao_senha = request.form.get('confirmacao_senha')
+
+        if not senha or not confirmacao_senha or senha != confirmacao_senha:
+            flash('As senhas não conferem ou estão em branco. Tente novamente.', 'danger')
+            return redirect(url_for('definir_senha_mentorado', id=id))
+
+        # Usa o método que criamos no Model para criptografar e salvar a senha
+        mentorado.set_password(senha)
+        db.session.commit()
+        
+        flash(f'Senha para {mentorado.nome} definida com sucesso!', 'success')
+        return redirect(url_for('detalhe', id=id))
+
+    return render_template('admin/form_definir_senha.html', mentorado=mentorado)
+
+@app.route('/admin/inscricoes')
+@admin_required # Protegida para administradores
+def lista_inscricoes():
+    """
+    Página principal que lista os inscritos com filtros.
+    """
+    query = Registros.query
+    
+    filtro_perfil = request.args.get('perfil', '')
+    filtro_desafio = request.args.get('desafio', '')
+    filtro_disponibilidade = request.args.get('disponibilidade', '')
+
+    if filtro_perfil:
+        query = query.filter(Registros.perfil == filtro_perfil)
+    if filtro_desafio:
+        query = query.filter(Registros.desafio == filtro_desafio)
+    if filtro_disponibilidade:
+        query = query.filter(Registros.disponibilidade.like(f'%{filtro_disponibilidade}%'))
+
+    dados_filtrados = query.order_by(Registros.data_inscricao.desc()).all()
+    
+    perfis_opcoes = sorted([p[0] for p in db.session.query(Registros.perfil).distinct().all() if p[0]])
+    desafios_opcoes = sorted([d[0] for d in db.session.query(Registros.desafio).distinct().all() if d[0]])
+    disponibilidades_opcoes = ['Manhã', 'Tarde', 'Noite', 'Fim de semana']
+    
+    filtros_ativos = {
+        'perfil': filtro_perfil,
+        'desafio': filtro_desafio,
+        'disponibilidade': filtro_disponibilidade
+    }
+
+    return render_template('admin/lista_inscricoes.html', dados=dados_filtrados, total=len(dados_filtrados),
+                           perfis=perfis_opcoes, desafios=desafios_opcoes,
+                           disponibilidades=disponibilidades_opcoes, filtros_ativos=filtros_ativos)
+
+@app.route('/turma/<int:turma_id>/avisos/novo', methods=['POST'])
+@admin_required
+def novo_aviso(turma_id):
+    """Processa o formulário para adicionar um novo aviso a uma turma."""
+    titulo = request.form.get('titulo')
+    conteudo = request.form.get('conteudo')
+    if titulo and conteudo:
+        novo = Avisos(turma_id=turma_id, titulo=titulo, conteudo=conteudo)
+        db.session.add(novo)
+        db.session.commit()
+        flash('Aviso publicado com sucesso!', 'success')
+    else:
+        flash('O título e o conteúdo do aviso não podem estar em branco.', 'danger')
+    return redirect(url_for('detalhes_turma', id=turma_id))
+
+@app.route('/avisos/deletar/<int:id>', methods=['POST'])
+@admin_required
+def deletar_aviso(id):
+    """Deleta um aviso."""
+    aviso = Avisos.query.get_or_404(id)
+    turma_id = aviso.turma_id
+    db.session.delete(aviso)
+    db.session.commit()
+    flash('Aviso removido com sucesso!', 'info')
+    return redirect(url_for('detalhes_turma', id=turma_id))
 
 # --- INICIALIZAÇÃO DA APLICAÇÃO ---
 if __name__ == '__main__':

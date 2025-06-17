@@ -1,0 +1,31 @@
+from app import app, db, Registros
+app.app_context().push()
+admin_user = Registros.query.filter_by(email="danielbrandao3.0@gmail.com").first()
+if admin_user:
+    admin_user.set_password("SenhaForte321")
+    admin_user.is_admin = True
+    db.session.commit()
+    print("Senha do admin definida com sucesso!")
+else:
+    print("Usuário admin não encontrado. Verifique o email.")
+exit()
+
+from app import app, db, Registros
+app.app_context().push()
+
+# Cole o e-mail que você copiou do CSV aqui
+email_do_admin = "danielbrandao3.0@gmail.com"
+
+print(f"Tentando definir a senha para: {email_do_admin}")
+
+admin_user = Registros.query.filter_by(email=email_do_admin).first()
+
+if admin_user:
+    admin_user.set_password("umaSenhaForte123") # Use esta senha para o teste
+    admin_user.is_admin = True
+    db.session.commit()
+    print("SUCESSO: Senha definida e privilégios de admin concedidos!")
+else:
+    print("FALHA: Usuário não encontrado com este e-mail. Verifique se o e-mail está correto e se o banco foi populado.")
+
+exit()
