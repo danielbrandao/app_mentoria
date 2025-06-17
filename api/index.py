@@ -9,7 +9,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 # --- CONFIGURAÇÃO DA APLICAÇÃO E DO BANCO DE DADOS ---
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
+
 # Chave secreta essencial para usar mensagens 'flash' e sessões.
 app.config['SECRET_KEY'] = 'uma-chave-secreta-muito-segura'
 
