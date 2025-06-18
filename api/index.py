@@ -326,7 +326,7 @@ def admin_required(f):
 
 @app.route('/admin/inscricoes')
 @admin_required # Protegida para administradores
-def lista_inscricoes():
+def admin_lista_inscricoes():
     """
     Página principal que lista os inscritos com filtros.
     """
