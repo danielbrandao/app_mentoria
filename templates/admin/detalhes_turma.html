@@ -1,14 +1,22 @@
 {% extends "layout.html" %}
-
 {% block title %}Detalhes da Turma{% endblock %}
-
 {% block content %}
 <div class="d-flex justify-content-between align-items-center">
-    <div>
-        <h1 class="mb-0">{{ turma.nome_turma }}</h1>
-        <p class="lead text-muted">{{ turma.descricao }}</p>
+    <div><h1 class="mb-0">{{ turma.nome_turma }}</h1><p class="lead text-muted">{{ turma.descricao }}</p></div>
+    <a href="{{ url_for('admin_lista_turmas') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar para Turmas</a>
+</div>
+<hr>
+<div class="card mb-5 shadow-sm">
+    <div class="card-header"><h5><i class="bi bi-link-45deg"></i> Vincular Módulos a esta Turma</h5></div>
+    <div class="card-body">
+        <form action="{{ url_for('vincular_modulos_turma', turma_id=turma.id) }}" method="POST">
+            <p>Selecione os módulos que os alunos desta turma poderão aceder:</p>
+            <div class="row">
+                {% for modulo in modulos_disponiveis %}<div class="col-md-4"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="modulos" value="{{ modulo.id }}" id="modulo-{{ modulo.id }}" {% if modulo in turma.modulos %}checked{% endif %}><label class="form-check-label" for="modulo-{{ modulo.id }}">{{ modulo.titulo }}</label></div></div>{% else %}<div class="col-12"><p class="text-muted">Nenhum módulo registado no sistema.</p></div>{% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Salvar Vínculos de Módulos</button>
+        </form>
     </div>
-    <a href="{{ url_for('lista_turmas') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar para Turmas</a>
 </div>
 <!-- NOVA SEÇÃO PARA GERENCIAR AVISOS -->
 <div class="row">

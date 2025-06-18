@@ -1,4 +1,8 @@
+print("--- SERVIDOR RECARREGADO COM A VERSÃO MAIS RECENTE ---")
+import sys
 import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from collections import Counter
@@ -6,6 +10,8 @@ from datetime import datetime
 import secrets
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from config import DATABASE_PATH
+
 
 
 # --- CONFIGURAÇÃO DA APLICAÇÃO E DO BANCO DE DADOS ---
@@ -15,8 +21,10 @@ app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['SECRET_KEY'] = 'uma-chave-secreta-muito-segura'
 
 # Configuração do caminho do banco de dados para garantir que ele seja criado na mesma pasta do projeto.
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'aplicacao.db')
+# basedir = os.path.abspath(os.path.dirname(__file__))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + DATABASE_PATH
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -148,247 +156,6 @@ class Avisos(db.Model):
 def load_user(user_id):
     return Registros.query.get(int(user_id))
 
-@app.route('/')
-@login_required # Garante que só usuários logados acessem a raiz do site
-def index():
-    """
-    Rota principal que atua como um portão de entrada, redirecionando
-    o usuário para o dashboard correto com base em seu perfil.
-    """
-    if current_user.is_admin:
-        return redirect(url_for('admin_dashboard'))
-    else:
-        return redirect(url_for('area_membros'))
-
-
-@app.route('/detalhe/<int:id>')
-def detalhe(id):
-    registro = Registros.query.get_or_404(id)
-    return render_template('detalhe.html', registro=registro)
-
-@app.route('/resumo')
-def resumo():
-    dados = Registros.query.all()
-    total_registros = len(dados) if dados else 1
-    
-    total_disponibilidade = Counter()
-    for item in dados:
-        if item.disponibilidade:
-            opcoes = [opt.strip() for opt in item.disponibilidade.split(',')]
-            total_disponibilidade.update(opcoes)
-
-    total_desafio = Counter(item.desafio for item in dados if item.desafio)
-    total_perfil = Counter(item.perfil for item in dados if item.perfil)
-
-    resumo_desafio = {k: {'total': v, 'pct': (v / total_registros) * 100} for k, v in total_desafio.items()}
-    resumo_disponibilidade = {k: {'total': v, 'pct': (v / total_registros) * 100} for k, v in total_disponibilidade.items()}
-    resumo_perfil = {k: {'total': v, 'pct': (v / total_registros) * 100} for k, v in total_perfil.items()}
-    
-    return render_template('resumo.html', 
-                           resumo_desafio=resumo_desafio,
-                           resumo_disponibilidade=resumo_disponibilidade,
-                           resumo_perfil=resumo_perfil)
-
-
-# --- ROTAS PARA GERENCIAR MONITORES ---
-
-@app.route('/monitores')
-def lista_monitores():
-    monitores = Monitores.query.order_by(Monitores.nome).all()
-    return render_template('lista_monitores.html', monitores=monitores)
-
-@app.route('/monitores/novo', methods=['GET', 'POST'])
-def novo_monitor():
-    if request.method == 'POST':
-        novo = Monitores(nome=request.form['nome'], email=request.form['email'],
-                         whatsapp=request.form['whatsapp'], resumo=request.form['resumo'],
-                         perfil=request.form['perfil'])
-        db.session.add(novo)
-        db.session.commit()
-        flash('Monitor cadastrado com sucesso!', 'success')
-        return redirect(url_for('lista_monitores'))
-    return render_template('form_monitor.html', titulo='Novo Monitor')
-
-@app.route('/monitores/editar/<int:id>', methods=['GET', 'POST'])
-def editar_monitor(id):
-    monitor = Monitores.query.get_or_404(id)
-    if request.method == 'POST':
-        monitor.nome = request.form['nome']
-        monitor.email = request.form['email']
-        monitor.whatsapp = request.form['whatsapp']
-        monitor.resumo = request.form['resumo']
-        monitor.perfil = request.form['perfil']
-        db.session.commit()
-        flash('Monitor atualizado com sucesso!', 'success')
-        return redirect(url_for('lista_monitores'))
-    return render_template('form_monitor.html', titulo='Editar Monitor', monitor=monitor)
-
-@app.route('/monitores/deletar/<int:id>', methods=['POST'])
-def deletar_monitor(id):
-    monitor = Monitores.query.get_or_404(id)
-    db.session.delete(monitor)
-    db.session.commit()
-    flash('Monitor removido com sucesso!', 'danger')
-    return redirect(url_for('lista_monitores'))
-
-
-# --- ROTAS PARA GERENCIAR TURMAS ---
-
-@app.route('/turmas')
-def lista_turmas():
-    turmas = Turmas.query.order_by(Turmas.data_inicio.desc()).all()
-    return render_template('lista_turmas.html', turmas=turmas)
-
-@app.route('/turmas/nova', methods=['GET', 'POST'])
-def nova_turma():
-    monitores_disponiveis = Monitores.query.all()
-    if request.method == 'POST':
-        data_inicio = datetime.strptime(request.form['data_inicio'], '%Y-%m-%d').date() if request.form['data_inicio'] else None
-        data_fim = datetime.strptime(request.form['data_fim'], '%Y-%m-%d').date() if request.form['data_fim'] else None
-
-        nova = Turmas(nome_turma=request.form['nome_turma'], descricao=request.form['descricao'],
-                      data_inicio=data_inicio, data_fim=data_fim, status=request.form['status'])
-        
-        for id_monitor in request.form.getlist('monitores'):
-            monitor = Monitores.query.get(id_monitor)
-            if monitor:
-                nova.monitores.append(monitor)
-        
-        db.session.add(nova)
-        db.session.commit()
-        flash('Turma criada com sucesso!', 'success')
-        return redirect(url_for('lista_turmas'))
-    
-    return render_template('form_turma.html', titulo='Nova Turma', monitores_disponiveis=monitores_disponiveis)
-
-@app.route('/turmas/editar/<int:id>', methods=['GET', 'POST'])
-def editar_turma(id):
-    turma = Turmas.query.get_or_404(id)
-    monitores_disponiveis = Monitores.query.all()
-    if request.method == 'POST':
-        turma.nome_turma = request.form['nome_turma']
-        turma.descricao = request.form['descricao']
-        turma.status = request.form['status']
-        turma.data_inicio = datetime.strptime(request.form['data_inicio'], '%Y-%m-%d').date() if request.form['data_inicio'] else None
-        turma.data_fim = datetime.strptime(request.form['data_fim'], '%Y-%m-%d').date() if request.form['data_fim'] else None
-
-        turma.monitores.clear()
-        for id_monitor in request.form.getlist('monitores'):
-            monitor = Monitores.query.get(id_monitor)
-            if monitor:
-                turma.monitores.append(monitor)
-        
-        db.session.commit()
-        flash('Turma atualizada com sucesso!', 'success')
-        return redirect(url_for('lista_turmas'))
-        
-    return render_template('form_turma.html', titulo='Editar Turma', turma=turma, monitores_disponiveis=monitores_disponiveis)
-
-# --- ROTAS PARA GERENCIAR ENCONTROS DE UMA TURMA ---
-
-@app.route('/turma/<int:id>/detalhes')
-def detalhes_turma(id):
-    """Mostra os detalhes de uma turma, incluindo encontros, mentorados, e mentorados disponíveis."""
-    turma = Turmas.query.get_or_404(id)
-    
-    # Busca os mentorados que ainda não foram alocados em NENHUMA turma
-    mentorados_disponiveis = Registros.query.filter(Registros.turma_id.is_(None)).order_by(Registros.nome).all()
-
-    # Ordena os encontros da turma pela data
-    encontros = sorted(turma.encontros, key=lambda x: x.data_encontro if x.data_encontro else datetime.min, reverse=True)
-    
-    return render_template('detalhes_turma.html', 
-                           turma=turma, 
-                           encontros=encontros, 
-                           mentorados_disponiveis=mentorados_disponiveis)
-
-@app.route('/turma/<int:turma_id>/encontros/novo', methods=['GET', 'POST'])
-def novo_encontro(turma_id):
-    """Página para criar um novo encontro para uma turma específica."""
-    turma = Turmas.query.get_or_404(turma_id)
-    # Passa apenas os monitores associados a esta turma para o formulário
-    monitores_da_turma = turma.monitores
-
-    if request.method == 'POST':
-        data_encontro_str = request.form['data_encontro']
-        data_encontro = datetime.strptime(data_encontro_str, '%Y-%m-%dT%H:%M') if data_encontro_str else None
-
-        novo = Encontros(
-            titulo=request.form['titulo'],
-            descricao=request.form['descricao'],
-            data_encontro=data_encontro,
-            link_meet=request.form['link_meet'],
-            status=request.form['status'],
-            turma_id=turma_id,
-            monitor_id=request.form['monitor_id']
-        )
-        db.session.add(novo)
-        db.session.commit()
-        flash('Encontro agendado com sucesso!', 'success')
-        return redirect(url_for('detalhes_turma', id=turma_id))
-    
-    return render_template('form_encontro.html', titulo='Agendar Novo Encontro', turma=turma, monitores_da_turma=monitores_da_turma)
-
-@app.route('/encontro/editar/<int:id>', methods=['GET', 'POST'])
-def editar_encontro(id):
-    """Página para editar um encontro existente."""
-    encontro = Encontros.query.get_or_404(id)
-    turma = encontro.turma
-    monitores_da_turma = turma.monitores
-    
-    if request.method == 'POST':
-        encontro.titulo = request.form['titulo']
-        encontro.descricao = request.form['descricao']
-        encontro.link_meet = request.form['link_meet']
-        encontro.status = request.form['status']
-        encontro.monitor_id = request.form['monitor_id']
-        
-        data_encontro_str = request.form['data_encontro']
-        encontro.data_encontro = datetime.strptime(data_encontro_str, '%Y-%m-%dT%H:%M') if data_encontro_str else None
-        
-        db.session.commit()
-        flash('Encontro atualizado com sucesso!', 'success')
-        return redirect(url_for('detalhes_turma', id=turma.id))
-
-    return render_template('form_encontro.html', titulo='Editar Encontro', encontro=encontro, turma=turma, monitores_da_turma=monitores_da_turma)
-
-@app.route('/encontro/deletar/<int:id>', methods=['POST'])
-def deletar_encontro(id):
-    """Rota para deletar um encontro."""
-    encontro = Encontros.query.get_or_404(id)
-    turma_id = encontro.turma_id
-    db.session.delete(encontro)
-    db.session.commit()
-    flash('Encontro removido com sucesso!', 'danger')
-    return redirect(url_for('detalhes_turma', id=turma_id))
-
-# --- ROTAS PARA GERENCIAR A ALOCAÇÃO DE MENTORADOS ---
-
-# 1. ATUALIZADA ROTA 'detalhes_turma' EXISTENTE COM ESTA VERSÃO:
-
-# 2. ADICIONE ESTA NOVA ROTA PARA ALOCAR UM MENTORADO:
-@app.route('/registro/<int:registro_id>/alocar/<int:turma_id>', methods=['POST'])
-def alocar_mentorado(registro_id, turma_id):
-    """Define o turma_id de um registro para alocá-lo a uma turma."""
-    registro = Registros.query.get_or_404(registro_id)
-    registro.turma_id = turma_id
-    db.session.commit()
-    flash(f"'{registro.nome}' foi adicionado(a) à turma com sucesso!", 'success')
-    return redirect(url_for('detalhes_turma', id=turma_id))
-
-
-# 3. ADICIONE ESTA NOVA ROTA PARA DESALOCAR UM MENTORADO:
-@app.route('/registro/<int:registro_id>/desalocar/<int:turma_id>', methods=['POST'])
-def desalocar_mentorado(registro_id, turma_id):
-    """Limpa o turma_id de um registro para removê-lo de uma turma."""
-    registro = Registros.query.get_or_404(registro_id)
-    # Apenas verifica se o registro realmente pertence a esta turma
-    if registro.turma_id == turma_id:
-        registro.turma_id = None
-        db.session.commit()
-        flash(f"'{registro.nome}' foi removido(a) da turma.", 'info')
-    return redirect(url_for('detalhes_turma', id=turma_id))
-
 # --- ROTAS PÚBLICAS PARA INSCRIÇÃO E MATRÍCULA ---
 
 @app.route('/pre-inscricao', methods=['GET', 'POST'])
@@ -471,6 +238,18 @@ def confirmar_matricula(token):
 
 ## Auth e Member area
 
+@app.route('/')
+@login_required # Garante que só usuários logados acessem a raiz do site
+def index():
+    """
+    Rota principal que atua como um portão de entrada, redirecionando
+    o usuário para o dashboard correto com base em seu perfil.
+    """
+    if current_user.is_admin:
+        return redirect(url_for('admin_dashboard'))
+    else:
+        return redirect(url_for('area_membros'))
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -495,19 +274,23 @@ def logout():
 @login_required # Esta linha protege a rota!
 def area_membros():
     """
-    Dashboard principal do mentorado. Exibe o progresso
+    Dashboard principal do mentorado. Exibe o progresso, avisos
     e os módulos de conteúdo aos quais ele tem acesso.
     """
-    # Pega a turma do usuário logado (current_user é disponibilizado pelo Flask-Login)
+    # Pega a turma do utilizador logado (current_user é disponibilizado pelo Flask-Login)
     turma_do_aluno = current_user.turma
     modulos_da_turma = []
     progresso_percent = 0
+    avisos_da_turma = []
 
     if turma_do_aluno:
         # Pega os módulos associados à turma, ordenados pela coluna 'ordem'
         modulos_da_turma = sorted(turma_do_aluno.modulos, key=lambda m: m.ordem)
         
-        # Lógica para calcular o progresso da mentoria
+        # Pega os avisos associados à turma, ordenados pela data de publicação
+        avisos_da_turma = sorted(turma_do_aluno.avisos, key=lambda a: a.data_publicacao, reverse=True)
+
+        # Lógica para calcular o progresso da mentoria com base nas datas
         hoje = datetime.utcnow().date()
         inicio = turma_do_aluno.data_inicio
         fim = turma_do_aluno.data_fim
@@ -523,7 +306,9 @@ def area_membros():
     
     return render_template('area_membros.html', 
                            modulos=modulos_da_turma, 
-                           progresso=progresso_percent)
+                           progresso=progresso_percent,
+                           avisos=avisos_da_turma)
+
 
 # --- ROTAS DO PAINEL DE ADMINISTRAÇÃO ---
 
@@ -538,90 +323,6 @@ def admin_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
-
-
-@app.route('/admin')
-@admin_required
-def admin_dashboard():
-    """Página principal do painel de administração."""
-    return render_template('admin/admin_dashboard.html')
-
-
-@app.route('/admin/modulos')
-@admin_required
-def lista_modulos():
-    """Lista todos os módulos para gerenciamento."""
-    modulos = Modulos.query.order_by(Modulos.ordem).all()
-    return render_template('admin/lista_modulos.html', modulos=modulos)
-
-
-@app.route('/admin/modulos/novo', methods=['GET', 'POST'])
-@admin_required
-def novo_modulo():
-    """Formulário para criar um novo módulo."""
-    if request.method == 'POST':
-        novo = Modulos(
-            titulo=request.form['titulo'],
-            descricao=request.form['descricao'],
-            ordem=int(request.form['ordem']),
-            thumbnail_url=request.form['thumbnail_url']
-        )
-        db.session.add(novo)
-        db.session.commit()
-        flash('Módulo criado com sucesso!', 'success')
-        return redirect(url_for('lista_modulos'))
-    return render_template('admin/form_modulo.html', titulo="Criar Novo Módulo")
-
-
-@app.route('/admin/modulos/editar/<int:id>', methods=['GET', 'POST'])
-@admin_required
-def editar_modulo(id):
-    """Formulário para editar um módulo existente."""
-    modulo = Modulos.query.get_or_404(id)
-    if request.method == 'POST':
-        modulo.titulo = request.form['titulo']
-        modulo.descricao = request.form['descricao']
-        modulo.ordem = int(request.form['ordem'])
-        modulo.thumbnail_url = request.form['thumbnail_url']
-        db.session.commit()
-        flash('Módulo atualizado com sucesso!', 'success')
-        return redirect(url_for('lista_modulos'))
-    return render_template('admin/form_modulo.html', titulo="Editar Módulo", modulo=modulo)
-
-
-@app.route('/admin/modulos/deletar/<int:id>', methods=['POST'])
-@admin_required
-def deletar_modulo(id):
-    """Deleta um módulo."""
-    modulo = Modulos.query.get_or_404(id)
-    db.session.delete(modulo)
-    db.session.commit()
-    flash('Módulo removido com sucesso!', 'danger')
-    return redirect(url_for('lista_modulos'))
-
-@app.route('/admin/registro/<int:id>/definir-senha', methods=['GET', 'POST'])
-@admin_required # Protege a rota para que apenas admins possam acessá-la
-def definir_senha_mentorado(id):
-    """
-    Página de administração para definir a senha de um mentorado.
-    """
-    mentorado = Registros.query.get_or_404(id)
-    if request.method == 'POST':
-        senha = request.form.get('senha')
-        confirmacao_senha = request.form.get('confirmacao_senha')
-
-        if not senha or not confirmacao_senha or senha != confirmacao_senha:
-            flash('As senhas não conferem ou estão em branco. Tente novamente.', 'danger')
-            return redirect(url_for('definir_senha_mentorado', id=id))
-
-        # Usa o método que criamos no Model para criptografar e salvar a senha
-        mentorado.set_password(senha)
-        db.session.commit()
-        
-        flash(f'Senha para {mentorado.nome} definida com sucesso!', 'success')
-        return redirect(url_for('detalhe', id=id))
-
-    return render_template('admin/form_definir_senha.html', mentorado=mentorado)
 
 @app.route('/admin/inscricoes')
 @admin_required # Protegida para administradores
@@ -658,7 +359,190 @@ def lista_inscricoes():
                            perfis=perfis_opcoes, desafios=desafios_opcoes,
                            disponibilidades=disponibilidades_opcoes, filtros_ativos=filtros_ativos)
 
-@app.route('/turma/<int:turma_id>/avisos/novo', methods=['POST'])
+@app.route('/admin/inscricao/<int:id>/detalhes')
+@admin_required
+def admin_detalhe_inscricao(id):
+    """Exibe os detalhes completos de um único inscrito."""
+    registro = Registros.query.get_or_404(id)
+    return render_template('admin/detalhe.html', registro=registro)
+
+@app.route('/admin/registro/<int:id>/definir-senha', methods=['GET', 'POST'])
+@admin_required
+def definir_senha_mentorado(id):
+    """Página de administração para definir a senha de um mentorado."""
+    mentorado = Registros.query.get_or_404(id)
+    if request.method == 'POST':
+        senha = request.form.get('senha')
+        confirmacao_senha = request.form.get('confirmacao_senha')
+
+        if not senha or not confirmacao_senha or senha != confirmacao_senha:
+            flash('As senhas não conferem ou estão em branco. Tente novamente.', 'danger')
+            return redirect(url_for('definir_senha_mentorado', id=id))
+
+        mentorado.set_password(senha)
+        db.session.commit()
+        
+        flash(f'Senha para {mentorado.nome} definida com sucesso!', 'success')
+        return redirect(url_for('admin_detalhe_inscricao', id=id))
+
+    return render_template('admin/form_definir_senha.html', mentorado=mentorado)
+
+
+@app.route('/admin/detalhe/<int:id>')
+@admin_required
+def detalhe(id):
+    registro = Registros.query.get_or_404(id)
+    return render_template('detalhe.html', registro=registro)
+
+@app.route('/admin/resumo')
+@admin_required
+def resumo():
+    dados = Registros.query.all()
+    total_registros = len(dados) if dados else 1
+    
+    total_disponibilidade = Counter()
+    for item in dados:
+        if item.disponibilidade:
+            opcoes = [opt.strip() for opt in item.disponibilidade.split(',')]
+            total_disponibilidade.update(opcoes)
+
+    total_desafio = Counter(item.desafio for item in dados if item.desafio)
+    total_perfil = Counter(item.perfil for item in dados if item.perfil)
+
+    resumo_desafio = {k: {'total': v, 'pct': (v / total_registros) * 100} for k, v in total_desafio.items()}
+    resumo_disponibilidade = {k: {'total': v, 'pct': (v / total_registros) * 100} for k, v in total_disponibilidade.items()}
+    resumo_perfil = {k: {'total': v, 'pct': (v / total_registros) * 100} for k, v in total_perfil.items()}
+    
+    return render_template('resumo.html', 
+                           resumo_desafio=resumo_desafio,
+                           resumo_disponibilidade=resumo_disponibilidade,
+                           resumo_perfil=resumo_perfil)
+# --- ROTAS PARA GERENCIAR MONITORES ---
+
+@app.route('/admin/monitores')
+@admin_required
+def admin_lista_monitores():
+    """Lista todos os monitores para gestão do administrador."""
+    monitores = Monitores.query.order_by(Monitores.nome).all()
+    return render_template('admin/lista_monitores.html', monitores=monitores)
+
+@app.route('/admin/monitores/novo', methods=['GET', 'POST'])
+@admin_required
+def admin_novo_monitor():
+    """Exibe e processa o formulário para criar um novo monitor."""
+    if request.method == 'POST':
+        novo = Monitores(
+            nome=request.form['nome'],
+            email=request.form['email'],
+            whatsapp=request.form['whatsapp'],
+            resumo=request.form['resumo'],
+            perfil=request.form['perfil']
+        )
+        db.session.add(novo)
+        db.session.commit()
+        flash('Monitor registado com sucesso!', 'success')
+        return redirect(url_for('admin_lista_monitores'))
+    return render_template('admin/form_monitor.html', titulo='Novo Monitor')
+
+@app.route('/admin/monitores/editar/<int:id>', methods=['GET', 'POST'])
+@admin_required
+def admin_editar_monitor(id):
+    """Exibe e processa o formulário para editar um monitor existente."""
+    monitor = Monitores.query.get_or_404(id)
+    if request.method == 'POST':
+        monitor.nome = request.form['nome']
+        monitor.email = request.form['email']
+        monitor.whatsapp = request.form['whatsapp']
+        monitor.resumo = request.form['resumo']
+        monitor.perfil = request.form['perfil']
+        db.session.commit()
+        flash('Monitor atualizado com sucesso!', 'success')
+        return redirect(url_for('admin_lista_monitores'))
+    return render_template('admin/form_monitor.html', titulo='Editar Monitor', monitor=monitor)
+
+
+@app.route('/admin/monitores/deletar/<int:id>', methods=['POST'])
+@admin_required
+def admin_deletar_monitor(id):
+    """Deleta um monitor do sistema."""
+    monitor = Monitores.query.get_or_404(id)
+    db.session.delete(monitor)
+    db.session.commit()
+    flash('Monitor removido com sucesso!', 'danger')
+    return redirect(url_for('admin_lista_monitores'))
+
+
+@app.route('/admin')
+@admin_required
+def admin_dashboard():
+    """Página principal do painel de administração."""
+    return render_template('admin/admin_dashboard.html')
+
+
+@app.route('/admin/modulos')
+@admin_required
+def admin_lista_modulos():
+    """Lista todos os módulos para gestão do administrador."""
+    modulos = Modulos.query.order_by(Modulos.ordem).all()
+    return render_template('admin/lista_modulos.html', modulos=modulos)
+
+
+@app.route('/admin/modulos/novo', methods=['GET', 'POST'])
+@admin_required
+def admin_novo_modulo():
+    """Exibe e processa o formulário para criar um novo módulo."""
+    if request.method == 'POST':
+        novo = Modulos(
+            titulo=request.form['titulo'],
+            descricao=request.form['descricao'],
+            ordem=int(request.form.get('ordem', 0)),
+            thumbnail_url=request.form.get('thumbnail_url')
+        )
+        db.session.add(novo)
+        db.session.commit()
+        flash('Módulo criado com sucesso!', 'success')
+        return redirect(url_for('admin_lista_modulos'))
+    return render_template('admin/form_modulo.html', titulo="Criar Novo Módulo")
+
+
+
+@app.route('/admin/modulos/editar/<int:id>', methods=['GET', 'POST'])
+@admin_required
+def admin_editar_modulo(id):
+    """Exibe e processa o formulário para editar um módulo existente."""
+    modulo = Modulos.query.get_or_404(id)
+    if request.method == 'POST':
+        modulo.titulo = request.form['titulo']
+        modulo.descricao = request.form['descricao']
+        modulo.ordem = int(request.form.get('ordem', 0))
+        modulo.thumbnail_url = request.form.get('thumbnail_url')
+        db.session.commit()
+        flash('Módulo atualizado com sucesso!', 'success')
+        return redirect(url_for('admin_lista_modulos'))
+    return render_template('admin/form_modulo.html', titulo="Editar Módulo", modulo=modulo)
+
+
+
+@app.route('/admin/modulos/deletar/<int:id>', methods=['POST'])
+@admin_required
+def admin_deletar_modulo(id):
+    """Deleta um módulo e todos os seus conteúdos associados (devido ao cascade)."""
+    modulo = Modulos.query.get_or_404(id)
+    db.session.delete(modulo)
+    db.session.commit()
+    flash('Módulo removido com sucesso!', 'danger')
+    return redirect(url_for('admin_lista_modulos'))
+
+@app.route('/admin/modulos/<int:id>/detalhes')
+@admin_required
+def admin_detalhes_modulo(id):
+    """Página para ver e gerir os conteúdos de um módulo específico."""
+    modulo = Modulos.query.get_or_404(id)
+    conteudos = sorted(modulo.conteudos, key=lambda c: c.ordem)
+    return render_template('admin/detalhes_modulo.html', modulo=modulo, conteudos=conteudos)
+
+
+@app.route('/admin/turma/<int:turma_id>/avisos/novo', methods=['POST'])
 @admin_required
 def novo_aviso(turma_id):
     """Processa o formulário para adicionar um novo aviso a uma turma."""
@@ -671,9 +555,10 @@ def novo_aviso(turma_id):
         flash('Aviso publicado com sucesso!', 'success')
     else:
         flash('O título e o conteúdo do aviso não podem estar em branco.', 'danger')
-    return redirect(url_for('detalhes_turma', id=turma_id))
+    return redirect(url_for('admin_detalhes_turma', id=turma_id))
 
-@app.route('/avisos/deletar/<int:id>', methods=['POST'])
+
+@app.route('/admin/avisos/deletar/<int:id>', methods=['POST'])
 @admin_required
 def deletar_aviso(id):
     """Deleta um aviso."""
@@ -682,7 +567,254 @@ def deletar_aviso(id):
     db.session.delete(aviso)
     db.session.commit()
     flash('Aviso removido com sucesso!', 'info')
-    return redirect(url_for('detalhes_turma', id=turma_id))
+    return redirect(url_for('admin_detalhes_turma', id=turma_id))
+
+
+
+@app.route('/admin/modulos/<int:modulo_id>/conteudo/novo', methods=['POST'])
+@admin_required
+def admin_novo_conteudo(modulo_id):
+    """Processa o formulário para adicionar um novo conteúdo a um módulo."""
+    novo = Conteudos(
+        modulo_id=modulo_id, titulo=request.form.get('titulo'), tipo=request.form.get('tipo'),
+        url_conteudo=request.form.get('url_conteudo'), descricao=request.form.get('descricao'),
+        ordem=int(request.form.get('ordem', 0))
+    )
+    db.session.add(novo)
+    db.session.commit()
+    flash('Conteúdo adicionado com sucesso!', 'success')
+    return redirect(url_for('admin_detalhes_modulo', id=modulo_id))
+
+@app.route('/admin/conteudo/editar/<int:id>', methods=['GET', 'POST'])
+@admin_required
+def admin_editar_conteudo(id):
+    """Formulário para editar um conteúdo existente."""
+    conteudo = Conteudos.query.get_or_404(id)
+    if request.method == 'POST':
+        conteudo.titulo = request.form['titulo']
+        conteudo.tipo = request.form['tipo']
+        conteudo.url_conteudo = request.form['url_conteudo']
+        conteudo.descricao = request.form['descricao']
+        conteudo.ordem = int(request.form['ordem'])
+        db.session.commit()
+        flash('Conteúdo atualizado com sucesso!', 'success')
+        return redirect(url_for('admin_detalhes_modulo', id=conteudo.modulo_id))
+    return render_template('admin/form_conteudo.html', titulo="Editar Conteúdo", conteudo=conteudo)
+
+@app.route('/admin/conteudo/deletar/<int:id>', methods=['POST'])
+@admin_required
+def admin_deletar_conteudo(id):
+    """Deleta um conteúdo."""
+    conteudo = Conteudos.query.get_or_404(id)
+    modulo_id = conteudo.modulo_id
+    db.session.delete(conteudo)
+    db.session.commit()
+    flash('Conteúdo removido com sucesso!', 'info')
+    return redirect(url_for('admin_detalhes_modulo', id=modulo_id))
+
+# --- ROTAS PARA GERENCIAR ENCONTROS DE UMA TURMA ---
+
+@app.route('/admin/turma/<int:turma_id>/encontros/novo', methods=['GET', 'POST'])
+@admin_required
+def novo_encontro(turma_id):
+    """Página para criar um novo encontro para uma turma específica."""
+    turma = Turmas.query.get_or_404(turma_id)
+    # Passa apenas os monitores associados a esta turma para o formulário
+    monitores_da_turma = turma.monitores
+
+    if request.method == 'POST':
+        data_encontro_str = request.form['data_encontro']
+        data_encontro = datetime.strptime(data_encontro_str, '%Y-%m-%dT%H:%M') if data_encontro_str else None
+
+        novo = Encontros(
+            titulo=request.form['titulo'],
+            descricao=request.form['descricao'],
+            data_encontro=data_encontro,
+            link_meet=request.form['link_meet'],
+            status=request.form['status'],
+            turma_id=turma_id,
+            monitor_id=request.form['monitor_id']
+        )
+        db.session.add(novo)
+        db.session.commit()
+        flash('Encontro agendado com sucesso!', 'success')
+        return redirect(url_for('admin_detalhes_turma', id=turma_id))
+    
+    return render_template('admin/form_encontro.html', titulo='Agendar Novo Encontro', turma=turma, monitores_da_turma=monitores_da_turma)
+
+@app.route('/admin/encontro/editar/<int:id>', methods=['GET', 'POST'])
+@admin_required
+def editar_encontro(id):
+    """Página para editar um encontro existente."""
+    encontro = Encontros.query.get_or_404(id)
+    turma = encontro.turma
+    monitores_da_turma = turma.monitores
+    
+    if request.method == 'POST':
+        encontro.titulo = request.form['titulo']
+        encontro.descricao = request.form['descricao']
+        encontro.link_meet = request.form['link_meet']
+        encontro.status = request.form['status']
+        encontro.monitor_id = request.form['monitor_id']
+        
+        data_encontro_str = request.form['data_encontro']
+        encontro.data_encontro = datetime.strptime(data_encontro_str, '%Y-%m-%dT%H:%M') if data_encontro_str else None
+        
+        db.session.commit()
+        flash('Encontro atualizado com sucesso!', 'success')
+        return redirect(url_for('admin_detalhes_turma', id=turma.id))
+
+    return render_template('admin/form_encontro.html', titulo='Editar Encontro', encontro=encontro, turma=turma, monitores_da_turma=monitores_da_turma)
+
+@app.route('/admin/encontro/deletar/<int:id>', methods=['POST'])
+@admin_required
+def deletar_encontro(id):
+    """Rota para deletar um encontro."""
+    encontro = Encontros.query.get_or_404(id)
+    turma_id = encontro.turma_id
+    db.session.delete(encontro)
+    db.session.commit()
+    flash('Encontro removido com sucesso!', 'danger')
+    return redirect(url_for('admin_detalhes_turma', id=turma_id))
+
+# --- ROTAS PARA GERENCIAR A ALOCAÇÃO DE MENTORADOS ---
+
+
+# 2. ROTA PARA ALOCAR UM MENTORADO:
+@app.route('/admin/registro/<int:registro_id>/alocar/<int:turma_id>', methods=['POST'])
+@admin_required
+def alocar_mentorado(registro_id, turma_id):
+    """Define o turma_id de um registo para alocá-lo a uma turma."""
+    registro = Registros.query.get_or_404(registro_id)
+    registro.turma_id = turma_id
+    db.session.commit()
+    flash(f"'{registro.nome}' foi adicionado(a) à turma com sucesso!", 'success')
+    return redirect(url_for('admin_detalhes_turma', id=turma_id))
+
+# --- ROTA Desalocar mentorado de uma turma ---
+@app.route('/admin/registro/<int:registro_id>/desalocar/<int:turma_id>', methods=['POST'])
+@admin_required
+def desalocar_mentorado(registro_id, turma_id):
+    """Limpa o turma_id de um registo para removê-lo de uma turma."""
+    registro = Registros.query.get_or_404(registro_id)
+    if registro.turma_id == turma_id:
+        registro.turma_id = None
+        db.session.commit()
+        flash(f"'{registro.nome}' foi removido(a) da turma.", 'info')
+    return redirect(url_for('admin_detalhes_turma', id=turma_id))
+
+# --- ROTAS PARA GERENCIAR TURMAS ---
+
+@app.route('/admin/turmas')
+@admin_required
+def admin_lista_turmas():
+    turmas = Turmas.query.order_by(Turmas.data_inicio.desc()).all()
+    return render_template('admin/lista_turmas.html', turmas=turmas)
+
+@app.route('/admin/turmas/nova', methods=['GET', 'POST'])
+@admin_required
+def admin_nova_turma():
+    """Exibe e processa o formulário para criar uma nova turma."""
+    monitores_disponiveis = Monitores.query.order_by(Monitores.nome).all()
+    if request.method == 'POST':
+        data_inicio = datetime.strptime(request.form['data_inicio'], '%Y-%m-%d').date() if request.form['data_inicio'] else None
+        data_fim = datetime.strptime(request.form['data_fim'], '%Y-%m-%d').date() if request.form['data_fim'] else None
+
+        nova = Turmas(nome_turma=request.form['nome_turma'], descricao=request.form['descricao'],
+                      data_inicio=data_inicio, data_fim=data_fim, status=request.form['status'])
+        
+        for id_monitor in request.form.getlist('monitores'):
+            monitor = Monitores.query.get(id_monitor)
+            if monitor:
+                nova.monitores.append(monitor)
+        
+        db.session.add(nova)
+        db.session.commit()
+        flash('Turma criada com sucesso!', 'success')
+        return redirect(url_for('admin_lista_turmas'))
+    
+    return render_template('admin/form_turma.html', titulo='Nova Turma', monitores_disponiveis=monitores_disponiveis)
+
+
+@app.route('/admin/turmas/editar/<int:id>', methods=['GET', 'POST'])
+@admin_required
+def admin_editar_turma(id):
+    """Exibe e processa o formulário para editar uma turma existente."""
+    turma = Turmas.query.get_or_404(id)
+    monitores_disponiveis = Monitores.query.order_by(Monitores.nome).all()
+    if request.method == 'POST':
+        turma.nome_turma = request.form['nome_turma']
+        turma.descricao = request.form['descricao']
+        turma.status = request.form['status']
+        turma.data_inicio = datetime.strptime(request.form['data_inicio'], '%Y-%m-%d').date() if request.form['data_inicio'] else None
+        turma.data_fim = datetime.strptime(request.form['data_fim'], '%Y-%m-%d').date() if request.form['data_fim'] else None
+
+        turma.monitores.clear()
+        for id_monitor in request.form.getlist('monitores'):
+            monitor = Monitores.query.get(id_monitor)
+            if monitor:
+                turma.monitores.append(monitor)
+        
+        db.session.commit()
+        flash('Turma atualizada com sucesso!', 'success')
+        return redirect(url_for('admin_lista_turmas'))
+        
+    return render_template('admin/form_turma.html', titulo='Editar Turma', turma=turma, monitores_disponiveis=monitores_disponiveis)
+
+@app.route('/admin/turma/<int:id>/detalhes')
+@admin_required
+def admin_detalhes_turma(id):
+    """Página de administração para ver detalhes de uma turma e gerir os seus membros, avisos e módulos."""
+    turma = Turmas.query.get_or_404(id)
+    mentorados_disponiveis = Registros.query.filter(Registros.turma_id.is_(None)).order_by(Registros.nome).all()
+    modulos_disponiveis = Modulos.query.order_by(Modulos.ordem).all()
+    encontros = sorted(turma.encontros, key=lambda x: x.data_encontro if x.data_encontro else datetime.min, reverse=True)
+    
+    return render_template('admin/detalhes_turma.html', 
+                           turma=turma, encontros=encontros, 
+                           mentorados_disponiveis=mentorados_disponiveis,
+                           modulos_disponiveis=modulos_disponiveis)
+
+@app.route('/admin/turma/<int:turma_id>/vincular-modulos', methods=['POST'])
+@admin_required
+def vincular_modulos_turma(turma_id):
+    """Processa o formulário da página de detalhes da turma, sincronizando os módulos selecionados com a turma."""
+    turma = Turmas.query.get_or_404(turma_id)
+    ids_dos_modulos_selecionados = request.form.getlist('modulos')
+    turma.modulos.clear()
+    for modulo_id in ids_dos_modulos_selecionados:
+        modulo = Modulos.query.get(modulo_id)
+        if modulo:
+            turma.modulos.append(modulo)
+    db.session.commit()
+    flash('Módulos da turma atualizados com sucesso!', 'success')
+    return redirect(url_for('admin_detalhes_turma', id=turma_id))
+
+# DEBUG ROUTES
+'''
+@app.route('/admin/debug-routes')
+def debug_routes():
+    """
+    Uma página de depuração que lista todas as rotas registadas na aplicação.
+    Isto ajuda a confirmar se o Flask reconhece uma rota específica.
+    """
+    output = []
+    for rule in app.url_map.iter_rules():
+        # Obtém os métodos (GET, POST, etc.) para a rota
+        methods = ','.join(rule.methods)
+        # Formata a linha para exibição
+        line = f"Endpoint: {rule.endpoint:<40} Métodos: {methods:<20} URL: {rule.rule}"
+        output.append(line)
+    
+    # Imprime a lista no terminal para fácil visualização
+    print("\n--- ROTAS REGISTADAS NA APLICAÇÃO ---")
+    for line in sorted(output):
+        print(line)
+    print("-------------------------------------\n")
+    
+    # Também exibe a lista no navegador
+    return "<pre>" + "\n".join(sorted(output)) + "</pre>"
+'''
 
 # --- INICIALIZAÇÃO DA APLICAÇÃO ---
 if __name__ == '__main__':

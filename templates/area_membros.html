@@ -1,29 +1,13 @@
 {% extends "layout.html" %}
-
 {% block title %}Área de Membros{% endblock %}
-
 {% block content %}
+
 <!-- Cabeçalho de Boas-vindas e Progresso -->
 <div class="mb-5">
     <h1 class="display-5">Olá, {{ current_user.nome.split()[0] }}!</h1>
     <p class="lead text-muted">Seja bem-vindo(a) à sua área de estudos.</p>
-
-    <!-- SEÇÃO DE AVISOS -->
-    {% if current_user.turma and current_user.turma.avisos %}
-    <div class="mb-5">
-        <h4><i class="bi bi-megaphone-fill"></i> Avisos Importantes</h4>
-        {% for aviso in current_user.turma.avisos|sort(attribute='data_publicacao', reverse=True) %}
-            <div class="alert alert-info">
-                <h5 class="alert-heading">{{ aviso.titulo }}</h5>
-                <p>{{ aviso.conteudo }}</p>
-                <hr>
-                <p class="mb-0 small">Publicado em: {{ aviso.data_publicacao.strftime('%d/%m/%Y') }}</p>
-            </div>
-        {% endfor %}
-    </div>
-    {% endif %}
     
-    {% if current_user.turma %}
+    {% if current_user.turma and current_user.turma.data_inicio and current_user.turma.data_fim %}
     <div class="mt-4">
         <h5>Progresso na Mentoria ({{ current_user.turma.nome_turma }})</h5>
         <div class="progress" style="height: 25px;">
@@ -35,8 +19,23 @@
     {% endif %}
 </div>
 
+<!-- Secção de Avisos Importantes -->
+{% if avisos %}
+<div class="mb-5">
+    <h4><i class="bi bi-megaphone-fill"></i> Avisos Importantes</h4>
+    {% for aviso in avisos %}
+        <div class="alert alert-info">
+            <h5 class="alert-heading">{{ aviso.titulo }}</h5>
+            <p>{{ aviso.conteudo|safe }}</p>
+            <hr>
+            <p class="mb-0 small">Publicado em: {{ aviso.data_publicacao.strftime('%d/%m/%Y') }}</p>
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
 
-<!-- Seção de Módulos de Conteúdo -->
+
+<!-- Secção de Módulos de Conteúdo -->
 {% for modulo in modulos %}
 <div class="mb-5">
     <h3 class="mb-3">{{ modulo.titulo }}</h3>
@@ -47,7 +46,7 @@
             <div class="card h-100 shadow-sm">
                 <!-- Se tiver uma thumbnail, use-a. Senão, uma cor padrão. -->
                 {% if modulo.thumbnail_url %}
-                    <img src="{{ modulo.thumbnail_url }}" class="card-img-top" alt="Thumbnail do Módulo">
+                    <img src="{{ modulo.thumbnail_url }}" class="card-img-top" alt="Thumbnail do Módulo" style="height: 150px; object-fit: cover;">
                 {% else %}
                     <div class="card-header bg-dark text-white">
                         <!-- Ícone baseado no tipo de conteúdo -->
@@ -59,12 +58,10 @@
                         {{ conteudo.tipo }}
                     </div>
                 {% endif %}
-                <div class="card-body">
+                <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{ conteudo.titulo }}</h5>
-                    <p class="card-text"><small>{{ conteudo.descricao }}</small></p>
-                </div>
-                <div class="card-footer text-end">
-                    <a href="{{ conteudo.url_conteudo }}" target="_blank" class="btn btn-primary btn-sm">Acessar Conteúdo</a>
+                    <p class="card-text flex-grow-1"><small>{{ conteudo.descricao }}</small></p>
+                    <a href="{{ conteudo.url_conteudo }}" target="_blank" class="btn btn-primary btn-sm mt-auto">Aceder ao Conteúdo</a>
                 </div>
             </div>
         </div>
@@ -77,8 +74,8 @@
 </div>
 {% else %}
 <!-- Mensagem exibida se o aluno não estiver em nenhuma turma ou não houver módulos -->
-<div class="text-center p-5 border rounded">
-    <h2>Nenhum conteúdo liberado para você no momento.</h2>
+<div class="text-center p-5 border rounded bg-light">
+    <h2>Nenhum conteúdo liberado para si no momento.</h2>
     <p>Fique de olho no seu e-mail para novidades sobre a liberação dos módulos!</p>
 </div>
 {% endfor %}

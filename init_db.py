@@ -1,13 +1,15 @@
 import csv
 import sqlite3
 from datetime import datetime
+from config import DATABASE_PATH
+
 
 # Nome do arquivo do banco de dados
 DATABASE = 'aplicacao.db'
 
 def criar_tabelas():
     """Cria as tabelas do banco de dados se não existirem."""
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
 
     # Tabela de Monitores
@@ -89,7 +91,7 @@ def importar_csv_para_registros():
     Lê o arquivo dados.csv e insere na tabela de registros,
     com depuração detalhada para cada linha.
     """
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     
     registros_inseridos = 0

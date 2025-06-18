@@ -1,11 +1,8 @@
 {% extends "layout.html" %}
-
 {% block title %}Definir Senha{% endblock %}
-
 {% block content %}
 <h1 class="mb-4">Definir Senha</h1>
 <h5 class="text-muted mb-4">Para o mentorado: {{ mentorado.nome }}</h5>
-
 <div class="card shadow-sm">
     <div class="card-body">
         <form method="POST" action="">
@@ -19,7 +16,7 @@
             </div>
             <hr>
             <div class="d-flex justify-content-end">
-                <a href="{{ url_for('detalhe', id=mentorado.id) }}" class="btn btn-secondary me-2">Cancelar</a>
+                <a href="{{ url_for('admin_detalhe_inscricao', id=mentorado.id) }}" class="btn btn-secondary me-2">Cancelar</a>
                 <button type="submit" class="btn btn-primary">Salvar Nova Senha</button>
             </div>
         </form>
