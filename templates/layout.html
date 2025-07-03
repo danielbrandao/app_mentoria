@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-br" class="h-100">
+<html lang="pt-br" class="h-100" data-bs-theme="dark">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -7,29 +7,79 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="icon" type="image/x-icon" sizes="32x32" href="../static/img/icone_desenvolvedor.ico">
 
-    
-    <title>Mentoria DEV+ - Área de Membros | {% block title %}{% endblock %}</title>
+    <title>Mentoria | {% block title %}{% endblock %}</title>
 
+    <!-- ESTILOS CORRIGIDOS PARA O LAYOUT "NETFLIX" -->
     <style>
-        /* Estilo para a imagem de fundo do Jumbotron */
-        .jumbotron-bg {
-            background-size: cover;
-            background-position: center;
+        .module-row .module-title {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+
+        .content-carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 1rem;
+            gap: 1rem; /* Espaço entre os cards */
+        }
+
+        .content-carousel::-webkit-scrollbar {
+            height: 8px;
+        }
+        .content-carousel::-webkit-scrollbar-thumb {
+            background: #495057;
+            border-radius: 10px;
+        }
+
+        .content-card {
+            flex: 0 0 auto; /* Impede que o card estique ou encolha */
+            width: 220px; /* Largura fixa para os cards, mais compacta */
+            transition: transform 0.2s ease-in-out;
+            border: 1px solid #343a40;
+            background-color: #212529; /* Fundo do card mais escuro */
+        }
+        .content-card:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+        .content-card a {
+            text-decoration: none;
+            color: inherit;
+        }
+        .content-card .card-img-top {
+            aspect-ratio: 3 / 4; /* Proporção mais vertical, como na referência */
+            object-fit: cover; /* Garante que a imagem preencha o espaço */
+            border-bottom: 1px solid #343a40;
+        }
+        .content-card .card-body {
+            padding: 0.8rem;
+        }
+        .content-card .card-title {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        .content-card .card-text {
+            font-size: 0.8rem;
+            color: #adb5bd; /* Texto secundário mais claro */
         }
     </style>
 </head>
-<body class="d-flex flex-column h-100 bg-light">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+<body class="d-flex flex-column h-100">
+    <!-- NAVBAR COMPLETA E CORRIGIDA -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-black shadow-sm" style="background-color: #000 !important;">
         <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-rocket-takeoff"></i>
-                Mentoria DEV<i class="bi bi-plus-circle-fill"></i> [Área de Membros]
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="bi bi-bar-chart-line-fill"></i>
+                Mentoria DEV <i class="bi bi-plus-circle-fill"></i>
             </a>
-            <div class="collapse navbar-collapse">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     {% if current_user.is_authenticated %}
-                        
-                        <!-- ADICIONE ESTA VERIFICAÇÃO PARA O PAINEL ADMIN -->
                         {% if current_user.is_admin %}
                         <li class="nav-item">
                             <a class="nav-link text-warning" href="{{ url_for('admin_dashboard') }}">
@@ -37,7 +87,6 @@
                             </a>
                         </li>
                         {% endif %}
-
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('area_membros') }}"><i class="bi bi-person-circle"></i> Área de Membros</a></li>
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}"><i class="bi bi-box-arrow-right"></i> Sair</a></li>
                     {% else %}
@@ -49,28 +98,28 @@
     </nav>
 
     <main class="flex-shrink-0">
-        <div class="container mt-4">
+        <div class="container my-5">
             {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        {% block content %}{% endblock %}
-
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
         </div>
     </main>
 
-    <footer class="footer mt-auto py-3 bg-dark text-white">
+    <footer class="footer mt-auto py-3 bg-black text-white-50">
         <div class="container text-center">
-            <span>Mentoria DEV+ © 2025</span>
+            <span>Plataforma de Mentoria © 2025</span>
         </div>
     </footer>
-
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>

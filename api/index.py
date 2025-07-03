@@ -1,6 +1,6 @@
-print("--- SERVIDOR RECARREGADO COM A VERSÃO MAIS RECENTE ---")
 import sys
 import os
+import re
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from flask import Flask, render_template, request, redirect, url_for, flash
@@ -157,6 +157,11 @@ def load_user(user_id):
     return Registros.query.get(int(user_id))
 
 # --- ROTAS PÚBLICAS PARA INSCRIÇÃO E MATRÍCULA ---
+
+# Rota alternativa para escolher qual mentoria/curso escolher
+@app.route('/escolha')
+def escolha():
+    return render_template('escolha.html')
 
 @app.route('/pre-inscricao', methods=['GET', 'POST'])
 def pre_inscricao():
@@ -569,6 +574,47 @@ def deletar_aviso(id):
     flash('Aviso removido com sucesso!', 'info')
     return redirect(url_for('admin_detalhes_turma', id=turma_id))
 
+# Player de video
+@app.route('/conteudo/<int:id>')
+@login_required
+def ver_conteudo(id):
+    """
+    Exibe uma página dedicada para um conteúdo específico,
+    com um leitor de vídeo incorporado para o Google Drive.
+    """
+    conteudo = Conteudos.query.get_or_404(id)
+    
+    # Verificação de segurança: o aluno tem acesso a este módulo?
+    turma_do_aluno = current_user.turma
+    if not turma_do_aluno or conteudo.modulo not in turma_do_aluno.modulos:
+        flash("Não tem permissão para aceder a este conteúdo.", "danger")
+        return redirect(url_for('area_membros'))
+
+    embed_url = None
+    # Verifica se é um vídeo do Google Drive
+    if conteudo.tipo == 'Vídeo':
+        # Caso seja Bunny Stream
+        if 'video.bunnycdn.com' in conteudo.url_conteudo:
+            embed_url = conteudo.url_conteudo
+
+        # Caso seja Google Drive
+        elif 'drive.google.com' in conteudo.url_conteudo:
+            match = re.search(r'/d/([a-zA-Z0-9_-]+)', conteudo.url_conteudo)
+            if match:
+                file_id = match.group(1)
+                embed_url = f"https://drive.google.com/file/d/{file_id}/preview?rm=minimal"
+            else:
+                embed_url = conteudo.url_conteudo
+
+        else:
+            # Caso seja outro link de vídeo direto
+            embed_url = conteudo.url_conteudo
+
+    else:
+        # Para outros tipos de conteúdo, usa o link diretamente
+        embed_url = conteudo.url_conteudo
+
+    return render_template('conteudo.html', conteudo=conteudo, embed_url=embed_url)
 
 
 @app.route('/admin/modulos/<int:modulo_id>/conteudo/novo', methods=['POST'])
