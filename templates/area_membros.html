@@ -1,69 +1,115 @@
 {% extends "layout.html" %}
 {% block title %}Sua Área de Membros{% endblock %}
-{% block content %}
 
-<!-- Cabeçalho de Boas-vindas e Progresso -->
+{% block content %}
+<!-- Estilos personalizados para o acordeão, para combinar com o tema -->
+<style>
+    .accordion-button {
+        background-color: rgba(33, 37, 41, 0.7);
+        color: #e9ecef;
+        font-weight: bold;
+    }
+    .accordion-button:not(.collapsed) {
+        color: #fff;
+        background-color: rgba(0, 170, 255, 0.15);
+        box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .accordion-button:focus {
+        box-shadow: 0 0 0 0.25rem rgba(0, 170, 255, 0.25);
+    }
+    .accordion-item {
+        background-color: rgba(20, 20, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .accordion-body {
+        padding: 0; /* Remove padding para o carrossel ocupar todo o espaço */
+    }
+</style>
+
+<!-- Container para as notificações (toasts) no topo e centro da tela -->
+<div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1100">
+    {% if avisos %}
+        {% for aviso in avisos %}
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header"><i class="bi bi-megaphone-fill rounded me-2"></i><strong class="me-auto">{{ aviso.titulo }}</strong><small>{{ aviso.data_publicacao.strftime('%d/%m') }}</small><button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button></div>
+            <div class="toast-body">{{ aviso.conteudo|safe }}</div>
+        </div>
+        {% endfor %}
+    {% endif %}
+</div>
+
+<!-- Cabeçalho de Boas-vindas -->
 <div class="mb-5">
-    <h1 class="display-5">Olá, {{ current_user.nome.split()[0] }}!</h1>
-    <p class="lead text-muted">Continue de onde parou e explore os novos conteúdos.</p>
-    
+    <h2 class="display-6">Olá, {{ current_user.nome.split()[0] }}!</h2>
+    <p class="lead text-white-50">Continue de onde parou e explore os novos conteúdos.</p>
     {% if current_user.turma and current_user.turma.data_inicio and current_user.turma.data_fim %}
     <div class="mt-4">
-        <h5>Progresso na Mentoria ({{ current_user.turma.nome_turma }})</h5>
-        <div class="progress" role="progressbar" style="height: 20px;">
-            <div class="progress-bar" style="width: {{ progresso }}%">{{ progresso }}%</div>
-        </div>
+        <h5 class="text-white-50">Progresso na Mentoria ({{ current_user.turma.nome_turma }})</h5>
+        <div class="progress" role="progressbar" style="height: 20px; background-color: rgba(0,0,0,0.3);"><div class="progress-bar" style="width: {{ progresso }}%; background-image: linear-gradient(to right, var(--primary-glow), var(--secondary-glow));">{{ progresso }}%</div></div>
     </div>
     {% endif %}
 </div>
 
-<!-- Secção de Avisos -->
-{% if avisos %}
-<div class="mb-5">
-    <h3 class="module-title mb-3"><i class="bi bi-megaphone-fill"></i> Avisos Importantes</h3>
-    {% for aviso in avisos %}
-        <div class="alert alert-secondary">
-            <h5 class="alert-heading">{{ aviso.titulo }}</h5>
-            <p class="mb-0">{{ aviso.conteudo|safe }}</p>
+<!-- Título principal da secção de conteúdos -->
+<div class="mb-4">
+    <h2 class="display-6"><i class="bi bi-collection-play"></i> Módulos e Conteúdos</h2>
+</div>
+
+<!-- Secção de Módulos em formato Acordeão -->
+<div class="accordion" id="modulosAccordion">
+    {% for modulo in modulos %}
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="heading-{{ modulo.id }}">
+            <button class="accordion-button {% if not loop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ modulo.id }}">
+                {{ modulo.titulo }}
+            </button>
+        </h2>
+        <div id="collapse-{{ modulo.id }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-bs-parent="#modulosAccordion">
+            <div class="accordion-body">
+                <div class="content-carousel">
+                    {% for conteudo in modulo.conteudos|sort(attribute='ordem') %}
+                    <div class="card content-card">
+                        <a href="{{ url_for('ver_conteudo', id=conteudo.id) }}">
+                            <!-- LÓGICA DA IMAGEM ATUALIZADA -->
+                            <img src="{{ conteudo.thumbnail_url or modulo.thumbnail_url or 'https://placehold.co/300x400/212529/495057?text=' ~ (conteudo.titulo|urlencode) }}" class="card-img-top" alt="{{ conteudo.titulo }}">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ conteudo.titulo }}</h5>
+                                <p class="card-text"><i class="bi {% if conteudo.tipo == 'Vídeo' %}bi-play-btn-fill{% elif conteudo.tipo == 'PDF' %}bi-file-earmark-pdf-fill{% elif conteudo.tipo == 'Slides' %}bi-file-earmark-slides-fill{% else %}bi-link-45deg{% endif %}"></i> {{ conteudo.tipo }}</p>
+                            </div>
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="p-4"><p class="text-muted">Nenhum conteúdo disponível neste módulo.</p></div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
+    </div>
+    {% else %}
+    <div class="text-center p-5 card">
+        <h2>Nenhum conteúdo liberado para si no momento.</h2>
+        <p class="text-white-50">Fique de olho no seu e-mail para novidades!</p>
+    </div>
     {% endfor %}
 </div>
-{% endif %}
 
-<!-- Secção de Módulos e Conteúdos -->
-{% for modulo in modulos %}
-<div class="module-row mb-5">
-    <h3 class="module-title mb-3">{{ modulo.titulo }}</h3>
-    <div class="content-carousel">
-        {% for conteudo in modulo.conteudos|sort(attribute='ordem') %}
-        <div class="card content-card">
-            <!-- ESTA É A LINHA QUE FOI ALTERADA -->
-            <a href="{{ url_for('ver_conteudo', id=conteudo.id) }}">
-                <!-- A imagem do card, agora com proporção vertical -->
-                <img src="{{ modulo.thumbnail_url or 'https://placehold.co/300x400/212529/495057?text=Aula' }}" class="card-img-top" alt="{{ conteudo.titulo }}">
-                <div class="card-body">
-                    <h5 class="card-title">{{ conteudo.titulo }}</h5>
-                    <p class="card-text">
-                        <i class="bi 
-                        {% if conteudo.tipo == 'Vídeo' %}bi-play-btn-fill{% 
-                        elif conteudo.tipo == 'PDF' %}bi-file-earmark-pdf-fill{% 
-                        elif conteudo.tipo == 'Slides' %}bi-file-earmark-slides-fill{% 
-                        else %}bi-link-45deg{% endif %}"></i>
-                        {{ conteudo.tipo }}
-                    </p>
-                </div>
-            </a>
-        </div>
-        {% else %}
-        <div class="col"><p class="text-muted">Nenhum conteúdo disponível neste módulo.</p></div>
-        {% endfor %}
-    </div>
-</div>
-{% else %}
-<div class="text-center p-5 border rounded border-secondary">
-    <h2>Nenhum conteúdo liberado para si no momento.</h2>
-    <p class="text-muted">Fique de olho no seu e-mail para novidades!</p>
-</div>
-{% endfor %}
+{% endblock %}
 
+
+<!-- Bloco de Scripts para inicializar os toasts -->
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const toastElList = document.querySelectorAll('.toast');
+        const toastList = [...toastElList].map(toastEl => {
+            // LÓGICA DO TOAST ATUALIZADA
+            const toast = new bootstrap.Toast(toastEl, { 
+                autohide: true, // Ativa o auto-fechamento
+                delay: 5000     // Define o tempo para 5 segundos
+            });
+            toast.show();
+            return toast;
+        });
+    });
+</script>
 {% endblock %}

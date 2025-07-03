@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from collections import Counter
 from datetime import datetime
 import secrets
@@ -28,6 +29,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + DATABASE_PATH
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+migrate = Migrate(app, db)
 
 # --- CONFIGURAÇÃO DO FLASK-LOGIN ---
 login_manager = LoginManager()
@@ -140,6 +143,8 @@ class Conteudos(db.Model):
     url_conteudo = db.Column(db.String(255), nullable=False)
     descricao = db.Column(db.Text)
     ordem = db.Column(db.Integer, default=0)
+    # NOVO CAMPO ADICIONADO:
+    thumbnail_url = db.Column(db.String(255), nullable=True)
 
 class Avisos(db.Model):
     __tablename__ = 'avisos'
@@ -480,9 +485,26 @@ def admin_deletar_monitor(id):
 @app.route('/admin')
 @admin_required
 def admin_dashboard():
-    """Página principal do painel de administração."""
-    return render_template('admin/admin_dashboard.html')
+    """Página principal do painel de administração (versão robusta)."""
+    try:
+        # Tenta calcular os totais
+        total_registros = Registros.query.count()
+        total_modulos = Modulos.query.count()
+        total_turmas_ativas = Turmas.query.filter_by(status='Ativa').count()
+    
+    except Exception as e:
+        # Se ocorrer um erro (ex: tabela não existe), envia uma mensagem de erro
+        # e define os totais como 0 para a página não quebrar.
+        flash(f"Ocorreu um erro ao carregar os dados do dashboard: {e}. Verifique se todas as tabelas da base de dados foram criadas.", "danger")
+        total_registros = 0
+        total_modulos = 0
+        total_turmas_ativas = 0
 
+    # Envia os totais (ou 0 em caso de erro) para o template
+    return render_template('admin/admin_dashboard.html',
+                           total_registros=total_registros,
+                           total_modulos=total_modulos,
+                           total_turmas_ativas=total_turmas_ativas)
 
 @app.route('/admin/modulos')
 @admin_required
@@ -621,14 +643,23 @@ def ver_conteudo(id):
 @admin_required
 def admin_novo_conteudo(modulo_id):
     """Processa o formulário para adicionar um novo conteúdo a um módulo."""
-    novo = Conteudos(
-        modulo_id=modulo_id, titulo=request.form.get('titulo'), tipo=request.form.get('tipo'),
-        url_conteudo=request.form.get('url_conteudo'), descricao=request.form.get('descricao'),
-        ordem=int(request.form.get('ordem', 0))
-    )
-    db.session.add(novo)
-    db.session.commit()
-    flash('Conteúdo adicionado com sucesso!', 'success')
+    titulo = request.form.get('titulo')
+    url_conteudo = request.form.get('url_conteudo')
+    if titulo and url_conteudo:
+        novo = Conteudos(
+            modulo_id=modulo_id,
+            titulo=titulo,
+            tipo=request.form.get('tipo'),
+            url_conteudo=url_conteudo,  
+            descricao=request.form.get('descricao'),
+            ordem=int(request.form.get('ordem', 0)),
+            thumbnail_url=request.form.get('thumbnail_url')
+        )
+        db.session.add(novo)
+        db.session.commit()
+        flash('Conteúdo adicionado com sucesso!', 'success')
+    else:
+        flash('Título e URL do conteúdo são obrigatórios.', 'danger')
     return redirect(url_for('admin_detalhes_modulo', id=modulo_id))
 
 @app.route('/admin/conteudo/editar/<int:id>', methods=['GET', 'POST'])
@@ -642,6 +673,7 @@ def admin_editar_conteudo(id):
         conteudo.url_conteudo = request.form['url_conteudo']
         conteudo.descricao = request.form['descricao']
         conteudo.ordem = int(request.form['ordem'])
+        conteudo.thumbnail_url = request.form.get('thumbnail_url')
         db.session.commit()
         flash('Conteúdo atualizado com sucesso!', 'success')
         return redirect(url_for('admin_detalhes_modulo', id=conteudo.modulo_id))
