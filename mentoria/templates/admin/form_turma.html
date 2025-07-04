@@ -14,7 +14,7 @@
             </div>
             <div class="mb-3"><label for="monitores" class="form-label">Monitores</label><select class="form-select" id="monitores" name="monitores" multiple size="5">{% for monitor in monitores_disponiveis %}<option value="{{ monitor.id }}" {% if turma and monitor in turma.monitores %}selected{% endif %}>{{ monitor.nome }}</option>{% endfor %}</select><div class="form-text">Segure Ctrl (ou Cmd no Mac) para selecionar mais de um.</div></div>
             <hr>
-            <div class="d-flex justify-content-end"><a href="{{ url_for('admin_lista_turmas') }}" class="btn btn-secondary me-2">Cancelar</a><button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar</button></div>
+            <div class="d-flex justify-content-end"><a href="{{ url_for('admin.admin_lista_turmas') }}" class="btn btn-secondary me-2">Cancelar</a><button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Salvar</button></div>
         </form>
     </div>
 </div>

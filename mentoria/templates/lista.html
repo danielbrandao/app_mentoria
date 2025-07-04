@@ -56,7 +56,7 @@
 
     <div class="list-group">
         {% for linha in dados %}
-            <a href="{{ url_for('detalhe', id=linha.id) }}" class="list-group-item list-group-item-action">
+            <a href="{{ url_for('admin.detalhe', id=linha.id) }}" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{{ linha.nome }}</h5>
                     <small>{{ linha._date }}</small>

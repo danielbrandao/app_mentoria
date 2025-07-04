@@ -69,7 +69,7 @@
                 <div class="content-carousel">
                     {% for conteudo in modulo.conteudos|sort(attribute='ordem') %}
                     <div class="card content-card">
-                        <a href="{{ url_for('ver_conteudo', id=conteudo.id) }}">
+                        <a href="{{ url_for('admin.ver_conteudo', id=conteudo.id) }}">
                             <!-- LÓGICA DA IMAGEM ATUALIZADA -->
                             <img src="{{ conteudo.thumbnail_url or modulo.thumbnail_url or 'https://placehold.co/300x400/212529/495057?text=' ~ (conteudo.titulo|urlencode) }}" class="card-img-top" alt="{{ conteudo.titulo }}">
                             <div class="card-body">

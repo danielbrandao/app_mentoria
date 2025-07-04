@@ -7,7 +7,7 @@
         <h1 class="display-6">{{ conteudo.titulo }}</h1>
         <p class="text-muted mb-0">Do módulo: {{ conteudo.modulo.titulo }}</p>
     </div>
-    <a href="{{ url_for('area_membros') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar para a Área de Membros</a>
+    <a href="{{ url_for('main.area_membros') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar para a Área de Membros</a>
 </div>
 <hr>
 
@@ -45,7 +45,7 @@
         <h4>Neste Módulo</h4>
         <div class="list-group">
             {% for item in conteudo.modulo.conteudos|sort(attribute='ordem') %}
-                <a href="{{ url_for('ver_conteudo', id=item.id) }}" class="list-group-item list-group-item-action {% if item.id == conteudo.id %}active{% endif %}">
+                <a href="{{ url_for('admin.ver_conteudo', id=item.id) }}" class="list-group-item list-group-item-action {% if item.id == conteudo.id %}active{% endif %}">
                     <i class="bi 
                     {% if item.tipo == 'Vídeo' %}bi-play-btn-fill{% 
                     elif item.tipo == 'PDF' %}bi-file-earmark-pdf-fill{% 

@@ -6,7 +6,7 @@
     <div class="container-fluid py-5">
         <h1 class="display-5 fw-bold"><i class="bi bi-funnel"></i> Relatório de Inscritos</h1>
         <p class="col-md-8 fs-4">Utilize os filtros abaixo para refinar a busca por candidatos.</p>
-        <form method="GET" action="{{ url_for('admin_lista_inscricoes') }}">
+        <form method="GET" action="{{ url_for('admin.admin_lista_inscricoes') }}">
             <!-- O conteúdo do formulário de filtros vai aqui... -->
         </form>
     </div>
@@ -23,7 +23,7 @@
                 <h5 class="card-title">{{ linha.nome }}</h5>
                 <h6 class="card-subtitle mb-2 text-body-secondary"><i class="bi bi-person-badge"></i> {{ linha.perfil }}</h6>
                 <p class="card-text flex-grow-1"><i class="bi bi-envelope"></i> <small>{{ linha.email }}</small></p>
-                <a href="{{ url_for('admin_detalhe_inscricao', id=linha.id) }}" class="btn btn-dark btn-sm mt-auto">Ver Detalhes</a>
+                <a href="{{ url_for('admin.admin_detalhe_inscricao', id=linha.id) }}" class="btn btn-dark btn-sm mt-auto">Ver Detalhes</a>
             </div>
         </div>
     </div>

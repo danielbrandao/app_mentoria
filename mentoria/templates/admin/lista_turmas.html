@@ -3,7 +3,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="mb-0">Gerir Turmas</h1>
-    <a href="{{ url_for('admin_nova_turma') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Criar Nova Turma</a>
+    <a href="{{ url_for('admin.admin_nova_turma') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Criar Nova Turma</a>
 </div>
 <div class="card shadow-sm">
     <div class="card-body">
@@ -25,8 +25,8 @@
                         </td>
                         <td><span class="badge bg-primary rounded-pill">{{ turma.mentorados.count() }}</span></td>
                         <td class="text-end">
-                            <a href="{{ url_for('admin_detalhes_turma', id=turma.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> Detalhes</a>
-                            <a href="{{ url_for('admin_editar_turma', id=turma.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil-square"></i> Editar</a>
+                            <a href="{{ url_for('admin.admin_detalhes_turma', id=turma.id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i> Detalhes</a>
+                            <a href="{{ url_for('admin.admin_editar_turma', id=turma.id) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil-square"></i> Editar</a>
                         </td>
                     </tr>
                     {% else %}

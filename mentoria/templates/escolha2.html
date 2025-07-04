@@ -1,12 +1,10 @@
 
+{% extends "layout.html" %}
+{% block title %}Escolha sua Jornada{% endblock %}
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escolha sua Jornada de Aprendizado</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+{% block content %}
+<!-- Script para carregar o Tailwind CSS (necessário para esta página) -->
+<script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
@@ -44,8 +42,7 @@
             background-size: 50px 50px;
         }
     </style>
-</head>
-<body class="min-h-screen gradient-bg tech-pattern">
+<div class="min-h-screen gradient-bg tech-pattern">
     <!-- Header -->
     <header class="text-center pt-12 pb-8">
         <div class="max-w-4xl mx-auto px-6">
@@ -97,9 +94,9 @@
                     </div>
                 </div>
                 
-                <button onclick="selectOption('dev')" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105">
+                <a href="{{ url_for('main.inscricao_dev') }}" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 text-center">
                     Escolher DEV+
-                </button>
+                </a>
             </div>
 
             <!-- Mentoria IA.edu -->
@@ -143,9 +140,9 @@
                     </div>
                 </div>
                 
-                <button onclick="selectOption('ia-edu')" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105">
+                <a href="{{ url_for('main.inscricao_ia_edu') }}" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 text-center">
                     Escolher IA.edu
-                </button>
+                </a>
             </div>
 
             <!-- Formação IA para Educadores -->
@@ -183,9 +180,9 @@
                     </div>
                 </div>
                 
-                <button onclick="selectOption('formacao')" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105">
+                <a href="{{ url_for('main.inscricao_ia_edu') }}" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 text-center">
                     Escolher Formação
-                </button>
+                </a>
             </div>
         </div>
 
@@ -306,4 +303,5 @@
         });
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'95963ed184fd6f8b',t:'MTc1MTU0NDI2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
-</html>
+{% endblock %}
+

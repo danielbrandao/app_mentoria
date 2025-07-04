@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="text-center mb-5">
+            <i class="bi bi-robot fs-1 text-warning"></i>
+            <h1>{{ titulo }}</h1>
+            <p class="lead text-white-50">Preencha os seus dados para garantir a sua vaga na lista de espera.</p>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="POST" action="">
+                    <div class="mb-3">
+                        <label class="form-label">Nome Completo</label>
+                        <input type="text" name="nome" class="form-control" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">WhatsApp</label>
+                            <input type="tel" name="whatsapp" class="form-control">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Qual o seu perfil profissional?</label>
+                        <select name="perfil_detalhado" class="form-select">
+                            <option>Professor Universitário</option>
+                            <option>Professor Ensino Médio</option>
+                            <option>Professor Ensino Fundamental</option>
+                            <option>Quero me tornar Professor</option>
+                            <option>Outro</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Qual o seu principal desafio hoje?</label>
+                        <select name="desafio_detalhado" class="form-select">
+                            <option>Aprender novas técnicas com IA</option>
+                            <option>Aprender a usar IA do zero</option>
+                            <option>Novas práticas e metodologias</option>
+                            <option>Primeira oportunidade como professor</option>
+                            <option>Melhorar desempenho em processo seletivo</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Qual o seu maior grau de escolaridade?</label>
+                        <select name="escolaridade" class="form-select">
+                            <option>Graduação</option>
+                            <option>Especialização</option>
+                            <option>Mestrado</option>
+                            <option>Doutorado</option>
+                            <option>Pós-doc</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Faça um resumo sobre a sua jornada profissional</label>
+                        <textarea name="resumo_jornada" class="form-control" rows="4"></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning btn-lg">Finalizar Pré-inscrição</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

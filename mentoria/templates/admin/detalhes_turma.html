@@ -3,13 +3,13 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center">
     <div><h1 class="mb-0">{{ turma.nome_turma }}</h1><p class="lead text-muted">{{ turma.descricao }}</p></div>
-    <a href="{{ url_for('admin_lista_turmas') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar para Turmas</a>
+    <a href="{{ url_for('admin.admin_lista_turmas') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar para Turmas</a>
 </div>
 <hr>
 <div class="card mb-5 shadow-sm">
     <div class="card-header"><h5><i class="bi bi-link-45deg"></i> Vincular Módulos a esta Turma</h5></div>
     <div class="card-body">
-        <form action="{{ url_for('vincular_modulos_turma', turma_id=turma.id) }}" method="POST">
+        <form action="{{ url_for('admin.vincular_modulos_turma', turma_id=turma.id) }}" method="POST">
             <p>Selecione os módulos que os alunos desta turma poderão aceder:</p>
             <div class="row">
                 {% for modulo in modulos_disponiveis %}<div class="col-md-4"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="modulos" value="{{ modulo.id }}" id="modulo-{{ modulo.id }}" {% if modulo in turma.modulos %}checked{% endif %}><label class="form-check-label" for="modulo-{{ modulo.id }}">{{ modulo.titulo }}</label></div></div>{% else %}<div class="col-12"><p class="text-muted">Nenhum módulo registado no sistema.</p></div>{% endfor %}
@@ -27,7 +27,7 @@
             <div class="list-group-item">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{{ aviso.titulo }}</h5>
-                    <form action="{{ url_for('deletar_aviso', id=aviso.id) }}" method="POST" onsubmit="return confirm('Tem certeza?');">
+                    <form action="{{ url_for('admin.deletar_aviso', id=aviso.id) }}" method="POST" onsubmit="return confirm('Tem certeza?');">
                         <button type="submit" class="btn-close" aria-label="Close"></button>
                     </form>
                 </div>
@@ -42,7 +42,7 @@
         <h3>Publicar Novo Aviso</h3>
         <div class="card">
             <div class="card-body">
-                <form action="{{ url_for('novo_aviso', turma_id=turma.id) }}" method="POST">
+                <form action="{{ url_for('admin.novo_aviso', turma_id=turma.id) }}" method="POST">
                     <div class="mb-3">
                         <label for="titulo" class="form-label">Título</label>
                         <input type="text" name="titulo" class="form-control" required>
@@ -62,7 +62,7 @@
 <!-- Seção de Encontros -->
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="mb-0">Encontros Agendados</h3>
-    <a href="{{ url_for('novo_encontro', turma_id=turma.id) }}" class="btn btn-primary">
+    <a href="{{ url_for('admin.novo_encontro', turma_id=turma.id) }}" class="btn btn-primary">
         <i class="bi bi-plus-circle"></i> Agendar Novo Encontro
     </a>
 </div>
@@ -90,10 +90,10 @@
                         <a href="{{ encontro.link_meet }}" target="_blank" class="btn btn-sm btn-outline-success" {% if not encontro.link_meet %}disabled{% endif %}>
                             <i class="bi bi-camera-video"></i> Link
                         </a>
-                        <a href="{{ url_for('editar_encontro', id=encontro.id) }}" class="btn btn-sm btn-outline-secondary">
+                        <a href="{{ url_for('admin.editar_encontro', id=encontro.id) }}" class="btn btn-sm btn-outline-secondary">
                             <i class="bi bi-pencil-square"></i> Editar
                         </a>
-                        <form action="{{ url_for('deletar_encontro', id=encontro.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este encontro?');">
+                        <form action="{{ url_for('admin.deletar_encontro', id=encontro.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja remover este encontro?');">
                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                 <i class="bi bi-trash"></i>
                             </button>
@@ -122,11 +122,11 @@
             {% for mentorado in turma.mentorados.order_by('nome') %}
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
-                        <a href="{{ url_for('detalhe', id=mentorado.id) }}" class="text-decoration-none text-dark fw-bold">{{ mentorado.nome }}</a><br>
+                        <a href="{{ url_for('admin.detalhe', id=mentorado.id) }}" class="text-decoration-none text-dark fw-bold">{{ mentorado.nome }}</a><br>
                         <small>{{ mentorado.email }}</small>
                     </div>
                     <!-- Formulário para remover o mentorado da turma -->
-                    <form action="{{ url_for('desalocar_mentorado', registro_id=mentorado.id, turma_id=turma.id) }}" method="POST">
+                    <form action="{{ url_for('admin.desalocar_mentorado', registro_id=mentorado.id, turma_id=turma.id) }}" method="POST">
                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Remover da Turma">
                             <i class="bi bi-x-lg"></i>
                         </button>
@@ -145,11 +145,11 @@
             {% for mentorado in mentorados_disponiveis %}
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
-                        <a href="{{ url_for('detalhe', id=mentorado.id) }}" class="text-decoration-none text-dark fw-bold">{{ mentorado.nome }}</a><br>
+                        <a href="{{ url_for('admin.detalhe', id=mentorado.id) }}" class="text-decoration-none text-dark fw-bold">{{ mentorado.nome }}</a><br>
                         <small>{{ mentorado.email }}</small>
                     </div>
                     <!-- Formulário para adicionar o mentorado à turma -->
-                    <form action="{{ url_for('alocar_mentorado', registro_id=mentorado.id, turma_id=turma.id) }}" method="POST">
+                    <form action="{{ url_for('admin.alocar_mentorado', registro_id=mentorado.id, turma_id=turma.id) }}" method="POST">
                         <button type="submit" class="btn btn-sm btn-outline-success" title="Adicionar à Turma">
                             <i class="bi bi-plus-lg"></i>
                         </button>
