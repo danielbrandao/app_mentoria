@@ -14,7 +14,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from config import DATABASE_PATH
 
 
-
 # --- CONFIGURAÇÃO DA APLICAÇÃO E DO BANCO DE DADOS ---
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 
@@ -31,6 +30,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 migrate = Migrate(app, db)
+
+#import de imagens
+import time
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = os.path.join(project_root, 'static', 'img','uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'} # <-- ESTA LINHA ESTAVA FALTANDO
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # --- CONFIGURAÇÃO DO FLASK-LOGIN ---
 login_manager = LoginManager()
@@ -154,6 +161,11 @@ class Avisos(db.Model):
     conteudo = db.Column(db.Text, nullable=False)
     data_publicacao = db.Column(db.DateTime, default=datetime.utcnow)
 
+
+# Função auxiliar para verificar se a extensão do ficheiro é permitida
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # --- ROTAS DA APLICAÇÃO ---
 
@@ -642,30 +654,44 @@ def ver_conteudo(id):
 @app.route('/admin/modulos/<int:modulo_id>/conteudo/novo', methods=['POST'])
 @admin_required
 def admin_novo_conteudo(modulo_id):
-    """Processa o formulário para adicionar um novo conteúdo a um módulo."""
+    """Processa o formulário para adicionar um novo conteúdo, agora com upload de imagem."""
     titulo = request.form.get('titulo')
     url_conteudo = request.form.get('url_conteudo')
+    thumbnail_url = request.form.get('thumbnail_url')
+    
+    # --- INÍCIO DA LÓGICA DE UPLOAD ---
+    file = request.files.get('thumbnail_file')
+    
+    # Se um ficheiro foi enviado, ele tem prioridade sobre a URL
+    if file and allowed_file(file.filename):
+        # Garante um nome de ficheiro seguro e único
+        filename = str(int(time.time())) + '_' + secure_filename(file.filename)
+        # Salva o ficheiro na nossa pasta de uploads
+        file.path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file.path)
+        # Guarda o caminho relativo para ser usado no HTML
+        thumbnail_url = f"/static/img/uploads/{filename}"
+    # --- FIM DA LÓGICA DE UPLOAD ---
+
     if titulo and url_conteudo:
         novo = Conteudos(
-            modulo_id=modulo_id,
-            titulo=titulo,
-            tipo=request.form.get('tipo'),
-            url_conteudo=url_conteudo,  
-            descricao=request.form.get('descricao'),
+            modulo_id=modulo_id, titulo=titulo, tipo=request.form.get('tipo'),
+            url_conteudo=url_conteudo, descricao=request.form.get('descricao'),
             ordem=int(request.form.get('ordem', 0)),
-            thumbnail_url=request.form.get('thumbnail_url')
+            thumbnail_url=thumbnail_url # Salva o caminho do upload ou a URL fornecida
         )
         db.session.add(novo)
         db.session.commit()
         flash('Conteúdo adicionado com sucesso!', 'success')
     else:
         flash('Título e URL do conteúdo são obrigatórios.', 'danger')
+        
     return redirect(url_for('admin_detalhes_modulo', id=modulo_id))
 
 @app.route('/admin/conteudo/editar/<int:id>', methods=['GET', 'POST'])
 @admin_required
 def admin_editar_conteudo(id):
-    """Formulário para editar um conteúdo existente."""
+    """Exibe e processa o formulário para editar um conteúdo, agora com upload de imagem."""
     conteudo = Conteudos.query.get_or_404(id)
     if request.method == 'POST':
         conteudo.titulo = request.form['titulo']
@@ -673,11 +699,27 @@ def admin_editar_conteudo(id):
         conteudo.url_conteudo = request.form['url_conteudo']
         conteudo.descricao = request.form['descricao']
         conteudo.ordem = int(request.form['ordem'])
-        conteudo.thumbnail_url = request.form.get('thumbnail_url')
+        
+        # --- INÍCIO DA LÓGICA DE UPLOAD ---
+        file = request.files.get('thumbnail_file')
+        thumbnail_url = request.form.get('thumbnail_url')
+        
+        if file and allowed_file(file.filename):
+            filename = str(int(time.time())) + '_' + secure_filename(file.filename)
+            file.path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file.path)
+            conteudo.thumbnail_url = f"/static/img/uploads/{filename}"
+        else:
+            # Se nenhum ficheiro novo for enviado, usa a URL do formulário
+            conteudo.thumbnail_url = thumbnail_url
+        # --- FIM DA LÓGICA DE UPLOAD ---
+            
         db.session.commit()
         flash('Conteúdo atualizado com sucesso!', 'success')
         return redirect(url_for('admin_detalhes_modulo', id=conteudo.modulo_id))
+        
     return render_template('admin/form_conteudo.html', titulo="Editar Conteúdo", conteudo=conteudo)
+
 
 @app.route('/admin/conteudo/deletar/<int:id>', methods=['POST'])
 @admin_required
