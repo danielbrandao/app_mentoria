@@ -1,0 +1,13 @@
+Olá Admin,
+
+Um novo lead manifestou interesse!
+
+- Nome: {{ lead.nome }}
+- Email: {{ lead.email }}
+- WhatsApp: {{ lead.whatsapp }}
+- Interesse Principal: {{ produto.nome }}
+
+Por favor, entre em contacto para os próximos passos.
+
+Atenciosamente,
+Plataforma de Mentoria

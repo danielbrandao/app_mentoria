@@ -2,6 +2,8 @@ from mentoria import db, login_manager
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+from flask import current_app
+from itsdangerous import URLSafeTimedSerializer as Serializer
 
 # --- MODELS (REPRESENTAÇÃO DAS TABELAS DO BANCO DE DADOS) ---
 
@@ -15,6 +17,13 @@ turma_modulos = db.Table('turma_modulos',
     db.Column('turma_id', db.Integer, db.ForeignKey('turmas.id'), primary_key=True),
     db.Column('modulo_id', db.Integer, db.ForeignKey('modulos.id'), primary_key=True)
 )
+
+class Produtos(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100), unique=True, nullable=False)
+    publico_alvo = db.Column(db.String(50), index=True) # Ex: 'DEV', 'Educadores'
+    descricao = db.Column(db.Text)
+    valor = db.Column(db.Float)
 
 class Turmas(db.Model):
     # A linha __tablename__ é ESSENCIAL para conectar esta classe à sua tabela.
@@ -63,7 +72,9 @@ class Registros(db.Model, UserMixin):
     mensagem = db.Column(db.Text)
 
     # --- NOVOS CAMPOS DETALHADOS ---
-    programa_interesse = db.Column(db.String(100)) # Ex: "DEV+", "IA.edu"
+    #programa_interesse = db.Column(db.String(100)) # Ex: "DEV+", "IA.edu"
+    produto_interesse_id = db.Column(db.Integer, db.ForeignKey('produtos.id'))
+    produto_interesse = db.relationship('Produtos', backref='interessados')
     perfil_detalhado = db.Column(db.String(100)) # Ex: "Backend", "Professor Universitário"
     desafio_detalhado = db.Column(db.String(100)) # Ex: "Migrar de área", "Aprender IA do zero"
     escolaridade = db.Column(db.String(100), nullable=True) # Apenas para IA.edu
@@ -77,6 +88,21 @@ class Registros(db.Model, UserMixin):
     password_hash = db.Column(db.String(128))
     is_admin = db.Column(db.Boolean, default=False)
     turma_id = db.Column(db.Integer, db.ForeignKey('turmas.id'))
+
+    def get_reset_token(self, expires_sec=1800):
+        """Gera um token seguro com tempo de expiração (30 minutos por defeito)."""
+        s = Serializer(current_app.config['SECRET_KEY'])
+        return s.dumps({'user_id': self.id})
+
+    @staticmethod
+    def verify_reset_token(token, expires_sec=1800):
+        """Verifica o token. Se for válido, retorna o utilizador correspondente."""
+        s = Serializer(current_app.config['SECRET_KEY'])
+        try:
+            user_id = s.loads(token, max_age=expires_sec)['user_id']
+        except:
+            return None
+        return Registros.query.get(user_id)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -125,6 +151,7 @@ class Avisos(db.Model):
     titulo = db.Column(db.String(150), nullable=False)
     conteudo = db.Column(db.Text, nullable=False)
     data_publicacao = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 
 # Função auxiliar para verificar se a extensão do ficheiro é permitida

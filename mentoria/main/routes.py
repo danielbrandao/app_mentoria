@@ -4,6 +4,7 @@ from mentoria import db
 from mentoria.models import Registros, Turmas, Modulos, Conteudos, Avisos
 from . import main # Importa o próprio blueprint
 from datetime import datetime
+from mentoria.email import send_email
 
 
 import secrets
@@ -17,63 +18,85 @@ def escolha():
 
 @main.route('/inscricao-dev', methods=['GET', 'POST'])
 def inscricao_dev():
-    """Exibe e processa o formulário para a Mentoria DEV+."""
     if request.method == 'POST':
-        email = request.form.get('email')
-        # Validação para evitar e-mails duplicados
-        if Registros.query.filter_by(email=email).first():
-            flash('Este e-mail já foi utilizado. Por favor, tente outro.', 'warning')
-            return redirect(url_for('main.inscricao_dev'))
+        try:
+            email = request.form.get('email')
+            if Registros.query.filter_by(email=email).first():
+                return jsonify({'status': 'error', 'message': 'Este e-mail já foi utilizado. Por favor, tente outro.'})
 
-        # Cria um novo registo com os campos detalhados
-        novo_registro = Registros(
-            nome=request.form.get('nome'),
-            email=email,
-            whatsapp=request.form.get('whatsapp'),
-            programa_interesse="Mentoria DEV+",
-            perfil_detalhado=request.form.get('perfil_detalhado'),
-            desafio_detalhado=request.form.get('desafio_detalhado'),
-            resumo_jornada=request.form.get('resumo_jornada'),
-            status='Inscrito',
-            token_matricula=secrets.token_hex(16)
-        )
-        db.session.add(novo_registro)
-        db.session.commit()
-        flash('Pré-inscrição na Mentoria DEV+ realizada com sucesso! Fique de olho no seu e-mail.', 'success')
-        return redirect(url_for('main.escolha'))
+            produto = Produtos.query.filter_by(nome="Mentoria DEV+").first()
+            if not produto:
+                return jsonify({'status': 'error', 'message': 'Erro de configuração: Produto "Mentoria DEV+" não encontrado.'})
+
+            novo_registro = Registros(
+                nome=request.form.get('nome'),
+                email=email,
+                whatsapp=request.form.get('whatsapp'),
+                produto_interesse_id=produto.id,
+                perfil_detalhado=request.form.get('perfil_detalhado'),
+                desafio_detalhado=request.form.get('desafio_detalhado'),
+                resumo_jornada=request.form.get('resumo_jornada'),
+                status='Inscrito',
+                token_matricula=secrets.token_hex(16)
+            )
+            db.session.add(novo_registro)
+            db.session.commit()
+            
+            return jsonify({'status': 'success', 'message': 'Pré-inscrição na Mentoria DEV+ realizada com sucesso!'})
+
+        except (IntegrityError, OperationalError) as e:
+            db.session.rollback()
+            # Este erro é capturado se a base de dados estiver dessincronizada
+            current_app.logger.error(f"Erro de base de dados na inscrição DEV+: {e}")
+            return jsonify({'status': 'error', 'message': 'Ocorreu um erro ao processar a sua inscrição. Verifique se a base de dados está atualizada.'}), 500
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Erro inesperado na inscrição DEV+: {e}")
+            return jsonify({'status': 'error', 'message': 'Ocorreu um erro inesperado. Tente novamente mais tarde.'}), 500
 
     return render_template('form_dev_plus.html', titulo="Inscrição | Mentoria DEV+")
 
 
 @main.route('/inscricao-ia-edu', methods=['GET', 'POST'])
 def inscricao_ia_edu():
-    """Exibe e processa o formulário para a Mentoria/Curso IA.edu."""
     if request.method == 'POST':
-        email = request.form.get('email')
-        # Validação para evitar e-mails duplicados
-        if Registros.query.filter_by(email=email).first():
-            flash('Este e-mail já foi utilizado. Por favor, tente outro.', 'warning')
-            return redirect(url_for('main.inscricao_ia_edu'))
+        try:
+            email = request.form.get('email')
+            if Registros.query.filter_by(email=email).first():
+                return jsonify({'status': 'error', 'message': 'Este e-mail já foi utilizado.'})
 
-        # Cria um novo registo com os campos detalhados
-        novo_registro = Registros(
-            nome=request.form.get('nome'),
-            email=email,
-            whatsapp=request.form.get('whatsapp'),
-            programa_interesse="IA para Educadores",
-            perfil_detalhado=request.form.get('perfil_detalhado'),
-            desafio_detalhado=request.form.get('desafio_detalhado'),
-            escolaridade=request.form.get('escolaridade'),
-            resumo_jornada=request.form.get('resumo_jornada'),
-            status='Inscrito',
-            token_matricula=secrets.token_hex(16)
-        )
-        db.session.add(novo_registro)
-        db.session.commit()
-        flash('Pré-inscrição na Formação IA para Educadores realizada com sucesso! Fique de olho no seu e-mail.', 'success')
-        return redirect(url_for('main.escolha'))
+            produto = Produtos.query.filter_by(nome="Mentoria IA.edu").first()
+            if not produto:
+                return jsonify({'status': 'error', 'message': 'Erro de configuração: Produto "Mentoria IA.edu" não encontrado.'})
 
-    return render_template('form_ia_edu.html', titulo="Inscrição | IA para Educadores")
+            novo_registro = Registros(
+                nome=request.form.get('nome'),
+                email=email,
+                whatsapp=request.form.get('whatsapp'),
+                produto_interesse_id=produto.id,
+                perfil_detalhado=request.form.get('perfil_detalhado'),
+                desafio_detalhado=request.form.get('desafio_detalhado'),
+                escolaridade=request.form.get('escolaridade'),
+                resumo_jornada=request.form.get('resumo_jornada'),
+                status='Inscrito',
+                token_matricula=secrets.token_hex(16)
+            )
+            db.session.add(novo_registro)
+            db.session.commit()
+
+            return jsonify({'status': 'success', 'message': 'Pré-inscrição na Formação IA para Educadores realizada com sucesso!'})
+
+        except (IntegrityError, OperationalError) as e:
+            db.session.rollback()
+            current_app.logger.error(f"Erro de base de dados na inscrição IA.edu: {e}")
+            return jsonify({'status': 'error', 'message': 'Ocorreu um erro ao processar a sua inscrição. Verifique se a base de dados está atualizada.'}), 500
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f"Erro inesperado na inscrição IA.edu: {e}")
+            return jsonify({'status': 'error', 'message': 'Ocorreu um erro inesperado. Tente novamente mais tarde.'}), 500
+
+    return render_template('form_ia_edu.html', titulo="Inscrição | IA.edu - IA para Educadores")
+
 
 
 @main.route('/pre-inscricao', methods=['GET', 'POST'])
@@ -154,31 +177,85 @@ def confirmar_matricula(token):
 
     return render_template('form_matricula.html', titulo="Confirmar Matrícula", registro=registro)
 
+@main.route('/interesse/<publico_alvo>', methods=['GET', 'POST'])
+def formulario_interesse(publico_alvo):
+    """
+    Exibe um formulário de interesse unificado baseado no público-alvo
+    e envia uma notificação por e-mail para o admin.
+    """
+    # Busca no banco os produtos para este público (ex: 'Educadores')
+    produtos = Produtos.query.filter_by(publico_alvo=publico_alvo).all()
+    if not produtos:
+        abort(404) # Se não houver produtos para este público, dá erro 404
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        if Registros.query.filter_by(email=email).first():
+            flash('Este e-mail já foi utilizado. Em breve entraremos em contacto.', 'info')
+            return redirect(url_for('main.formulario_interesse', publico_alvo=publico_alvo))
+
+        novo_registro = Registros(
+            nome=request.form.get('nome'),
+            email=email,
+            whatsapp=request.form.get('whatsapp'),
+            produto_interesse_id=request.form.get('produto_interesse_id'),
+            # ... (salve outros campos do formulário aqui)
+        )
+        db.session.add(novo_registro)
+        db.session.commit()
+
+        # Envia o e-mail de notificação para o admin
+        produto_escolhido = Produtos.query.get(novo_registro.produto_interesse_id)
+        send_email(current_app.config['ADMIN_EMAIL'], 
+                   f'Novo Lead: {novo_registro.nome} para {produto_escolhido.nome}',
+                   'email/novo_lead_admin', 
+                   lead=novo_registro,
+                   produto=produto_escolhido)
+
+        return render_template('agradecimento.html')
+
+    return render_template('form_interesse.html', produtos=produtos, publico_alvo=publico_alvo)
+
+
 ## Auth e Member area
 
 @main.route('/')
-@login_required # Garante que só usuários logados acessem a raiz do site
+@login_required # Garante que só utilizadores logados acedam à raiz do site
 def index():
     """
     Rota principal que atua como um portão de entrada, redirecionando
-    o usuário para o dashboard correto com base em seu perfil.
+    o utilizador para o dashboard correto com base no seu perfil.
     """
     if current_user.is_admin:
         return redirect(url_for('admin.admin_dashboard'))
     else:
         return redirect(url_for('main.area_membros'))
-
+    
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.area_membros'))
+        return redirect(url_for('main.index'))
+    
     if request.method == 'POST':
-        user = Registros.query.filter_by(email=request.form['email']).first()
-        if user and user.check_password(request.form['password']):
-            login_user(user, remember=request.form.get('remember'))
-            return redirect(url_for('main.area_membros'))
+        user = Registros.query.filter_by(email=request.form.get('email')).first()
+        
+        # Verifica se o utilizador existe E se a senha está correta
+        if user and user.check_password(request.form.get('password')):
+            
+            # --- LÓGICA "LEMBRAR DE MIM" ADICIONADA AQUI ---
+            # Verifica se a checkbox "remember" foi marcada no formulário
+            remember_me = request.form.get('remember') == 'on'
+            # Passa o resultado para a função login_user
+            login_user(user, remember=remember_me)
+            
+            # Redireciona para a página que o utilizador tentava aceder ou para a home
+            next_page = request.args.get('next')
+            return redirect(next_page or url_for('main.index'))
         else:
-            flash('Login inválido. Verifique seu e-mail e senha.', 'danger')
+            # --- MENSAGEM DE ERRO GARANTIDA ---
+            # Se o login falhar, envia esta mensagem para ser exibida no template
+            flash('Login inválido. Verifique o seu e-mail e senha.', 'danger')
+    
     return render_template('login.html')
 
 @main.route('/logout')
@@ -187,6 +264,52 @@ def logout():
     logout_user() # Função do Flask-Login que limpa a sessão do usuário
     flash("Você saiu da sua conta com sucesso.", "info")
     return redirect(url_for('main.login')) # Redireciona para a página de login
+
+@main.route("/reset_password_request", methods=['GET', 'POST'])
+def reset_password_request():
+    """Exibe o formulário para pedir a recuperação de senha."""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    if request.method == 'POST':
+        user = Registros.query.filter_by(email=request.form['email']).first()
+        if user:
+            # Se o utilizador existir, envia o e-mail com o link de reset
+            token = user.get_reset_token()
+            send_email(user.email, 
+                       'Instruções para Recuperar a sua Senha',
+                       'email/reset_password',
+                       user=user, token=token)
+        # Mostra a mesma mensagem quer o e-mail exista ou não, por segurança
+        flash('Se existir uma conta com este e-mail, receberá as instruções para recuperar a sua senha.', 'info')
+        return redirect(url_for('main.login'))
+    return render_template('reset_password_request.html', title='Recuperar Senha')
+
+
+@main.route("/reset_password/<token>", methods=['GET', 'POST'])
+def reset_password(token):
+    """Página para o utilizador inserir a nova senha, acedida via token."""
+    if current_user.is_authenticated:
+        return redirect(url_for('main.index'))
+    
+    user = Registros.verify_reset_token(token)
+    if not user:
+        flash('O link de recuperação é inválido ou expirou.', 'warning')
+        return redirect(url_for('main.reset_password_request'))
+    
+    if request.method == 'POST':
+        password = request.form['password']
+        confirm_password = request.form['confirm_password']
+        if password != confirm_password:
+            flash('As senhas não coincidem.', 'danger')
+            return redirect(url_for('main.reset_password', token=token))
+
+        user.set_password(password)
+        db.session.commit()
+        flash('A sua senha foi atualizada com sucesso! Pode agora fazer o login.', 'success')
+        return redirect(url_for('main.login'))
+        
+    return render_template('reset_password.html', title='Definir Nova Senha', token=token)
+
 
 @main.route('/area-membros')
 @login_required # Esta linha protege a rota!

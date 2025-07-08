@@ -1,4 +1,6 @@
-{% block title %}Escolha sua Jornada{% endblock %}
+{% extends "layout2.html" %}
+
+{% block title %}Escolha a sua Jornada{% endblock %}
 
 {% block content %}
 <!-- Script para carregar o Tailwind CSS (necessário para esta página) -->
@@ -24,142 +26,88 @@
 <!-- Conteúdo Principal com os Cards -->
 <main class="max-w-6xl mx-auto px-6 pb-16">
     <div class="grid md:grid-cols-3 gap-8">
-        <!-- Card Mentoria DEV+ -->
-        <!--div class="card-hover bg-gray-800 text-white rounded-2xl p-8 shadow-xl flex flex-col"-->
-            <!-- Mentoria DEV+ -->
-            <div class="card-hover bg-white rounded-2xl p-8 shadow-xl border-blue-400 border-2 shadow-xl flex flex-col">
-                <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Mentoria DEV+</h2>
-                    <p class="text-gray-600 leading-relaxed">
-                        Acelere sua carreira em desenvolvimento de software com mentoria personalizada e projetos práticos
-                    </p>
+        
+        <!-- Card 1: Mentoria DEV+ -->
+        <div class="card-hover bg-white rounded-2xl p-8 shadow-xl flex flex-col border-2 border-blue-500">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-code-slash text-3xl text-white"></i>
                 </div>
-                
-                <div class="space-y-3 mb-8">
-                    <div class="flex items-center text-gray-700">
-                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        Mentoria 1:1 personalizada
-                    </div>
-                    <div class="flex items-center text-gray-700">
-                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        Projetos reais do mercado
-                    </div>
-                    <div class="flex items-center text-gray-700">
-                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        Suporte para carreira tech
-                    </div>
-                </div>
-                
-                <button onclick="openFormModal('dev')" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 text-center">
-                    Escolher DEV+
-                </button>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Mentoria DEV+</h2>
+                <p class="text-gray-600 leading-relaxed">Acelere a sua carreira em Dev e Dados com mentoria personalizada e projetos práticos.</p>
             </div>
-            
-
-        <!-- Card Mentoria IA.edu -->
-        <!--div class="card-hover bg-gray-800 text-white rounded-2xl p-8 shadow-xl border-2 border-yellow-400 flex flex-col relative"-->
-            <!-- Formação IA para Educadores -->
-            <div class="card-hover bg-white rounded-2xl p-8 shadow-xl border-green-400 border-2">
-                <div class="absolute -top-3 left-1/2  -translate-x-1/2">
-                    <span class="bg-yellow-400 text-yellow-900 px-4 py-1 rounded-full text-sm font-semibold pulse-animation">
-                        INICIO IMEDIATO
-                    </span>
-                </div>
-                <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Formação IA para Educadores</h2>
-                    <p class="text-gray-600 leading-relaxed">
-                        Curso completo para educadores que querem integrar IA em suas práticas pedagógicas
-                    </p>
-                </div>
-                
-                <div class="space-y-3 mb-8">
-                    <div class="flex items-center text-gray-700">
-                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        Módulos estruturados
-                    </div>
-                    <div class="flex items-center text-gray-700">
-                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        Certificação inclusa
-                    </div>
-                    <div class="flex items-center text-gray-700">
-                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        Comunidade de educadores
-                    </div>
-                </div>
-                <button onclick="openFormModal('ia-edu')" class="w-full bg-gradient-to-r from-green-500 to-green-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-green-600 hover:to-green-600 transition-all duration-300 transform hover:scale-105 text-center">
-                    Escolher IA.edu
-                </button>
+            <div class="space-y-3 mb-8 flex-grow">
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Estruturação de Currículo e Portfólio</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Plano de carreira e preparação para entrevistas</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Participação em Projetos reais</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Sessões com especialistas na área</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Comunidade exclusiva de programadores</div>
             </div>
+            <button onclick="openFormModal('dev')" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 text-center">
+                Escolher DEV+
+            </button>
+        </div>
 
+        <!-- Card 2: Formação IA para Educadores -->
+        <div class="card-hover bg-white rounded-2xl p-8 shadow-xl border-green-400 border-2 flex flex-col relative">
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <span class="bg-green-400 text-green-900 px-4 py-1 rounded-full text-sm font-semibold">
+                    INÍCIO IMEDIATO
+                </span>
+            </div>
+            <div class="text-center mb-6 mt-4">
+                <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-book-half text-3xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Formação IA.edu </h2>
+                <p class="text-gray-600 leading-relaxed">Curso completo para educadores que querem integrar IA nas suas práticas pedagógicas.</p>
+            </div>
+            <div class="space-y-3 mb-8 flex-grow">
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Módulos estruturados e práticos</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Templates e Modelos prontos para uso</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Módulos sobre Metodologias Ativas</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Certificação inclusa</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Acesso às atualizações durante 12 meses</div>
+            </div>
+            <button onclick="openFormModal('ia-edu')" class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 text-center">
+                Escolher Formação
+            </button>
+        </div>
 
-        <!-- Card Formação IA para Educadores -->
-        <div class="card-hover bg-white rounded-2xl p-8 shadow-xl border-2 border-yellow-400 shadow-xl flex flex-col">
-                
-                <div class="text-center mb-6 mt-4">
-                    <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-                        </svg>
-                    </div>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Mentoria IA.edu</h2>
-                    <p class="text-gray-600 leading-relaxed">
-                        Domine a Inteligência Artificial aplicada à educação e revolucione sua forma de ensinar
-                    </p>
+        <!-- Card 3: Mentoria IA.edu -->
+        <div class="card-hover bg-white rounded-2xl p-8 shadow-xl border-2 border-yellow-400 flex flex-col">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-robot text-3xl text-white"></i>
                 </div>
-                
-                <div class="space-y-3 mb-8">
-                    <div class="flex items-center text-gray-700">
-                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        IA para criação de conteúdo
-                    </div>
-                    <div class="flex items-center text-gray-700">
-                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        Automação educacional
-                    </div>
-                    <div class="flex items-center text-gray-700">
-                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        Ferramentas práticas
-                    </div>
-                    <button onclick="openFormModal('ia-edu')" class="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-yellow-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 text-center">
-                     Escolher Formação
-                    </button>
-                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Mentoria IA.edu</h2>
+                <p class="text-gray-600 leading-relaxed">Domine a Inteligência Artificial aplicada à educação e revolucione a sua forma de ensinar.</p>
+            </div>
+            <div class="space-y-3 mb-8 flex-grow">
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Uso de IA para criação de conteúdos</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Acesso completo ao curso IA.Edu</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Sessões ao vivo com especialistas</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Preparação para aulas e práticas em didática</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Comunidade exclusiva de educadores</div>
+            </div>
+            <button onclick="openFormModal('ia-edu')" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 text-center">
+                Escolher IA.edu
+            </button>
         </div>
     </div>
 </main>
 
-<!-- Estrutura do Modal (inicialmente oculto) -->
-<div id="formModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4" onclick="closeModal(event)">
-    <div id="modal-content-wrapper" class="bg-gray-900 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-all duration-300">
+<!-- MODAL PARA CARREGAR O FORMULÁRIO -->
+<div id="formModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4" onclick="closeModal('formModal', event)">
+    <div id="modal-content-wrapper" class="bg-gray-100 text-gray-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-all duration-300" onclick="event.stopPropagation()">
         <!-- O conteúdo do formulário será injetado aqui -->
+    </div>
+</div>
+
+<!-- NOVO MODAL PARA EXIBIR MENSAGENS DE SUCESSO/ERRO -->
+<div id="resultModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4" onclick="closeModal('resultModal', event)">
+    <div id="result-modal-content" class="bg-white text-gray-800 rounded-2xl p-8 max-w-md mx-4 text-center transform scale-95 transition-all duration-300" onclick="event.stopPropagation()">
+        <!-- O conteúdo do resultado será injetado aqui -->
     </div>
 </div>
 
@@ -167,8 +115,10 @@
 
 {% block scripts %}
 <script>
-    const modal = document.getElementById('formModal');
-    const modalContentWrapper = document.getElementById('modal-content-wrapper');
+    const formModal = document.getElementById('formModal');
+    const formModalContent = document.getElementById('modal-content-wrapper');
+    const resultModal = document.getElementById('resultModal');
+    const resultModalContent = document.getElementById('result-modal-content');
 
     async function openFormModal(formType) {
         let url = '';
@@ -178,28 +128,24 @@
             url = "{{ url_for('main.inscricao_ia_edu') }}";
         }
 
-        // Mostra um spinner de carregamento
-        modalContentWrapper.innerHTML = `<div class="p-8 text-center"><div class="spinner-border text-light" role="status"><span class="visually-hidden">A carregar...</span></div></div>`;
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-        setTimeout(() => modalContentWrapper.classList.remove('scale-95'), 10);
+        modalContentWrapper.innerHTML = `<div class="p-8 text-center"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div><p class="mt-4">A carregar...</p></div>`;
+        formModal.classList.remove('hidden');
+        formModal.classList.add('flex');
+        setTimeout(() => formModalContent.classList.remove('scale-95'), 10);
 
         try {
-            // Busca o HTML do formulário
             const response = await fetch(url);
             const html = await response.text();
             
-            // Extrai apenas o conteúdo do bloco principal para injetar no modal
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             const formContent = doc.querySelector('.row.justify-content-center');
 
             if (formContent) {
-                modalContentWrapper.innerHTML = '';
-                modalContentWrapper.appendChild(formContent);
+                formModalContent.innerHTML = '';
+                formModalContent.appendChild(formContent);
                 
-                // Adiciona um listener para o formulário que acabámos de injetar
-                const form = modalContentWrapper.querySelector('form');
+                const form = formModalContent.querySelector('form');
                 if (form) {
                     form.addEventListener('submit', handleFormSubmit);
                 }
@@ -207,7 +153,7 @@
                 throw new Error('Conteúdo do formulário não encontrado.');
             }
         } catch (error) {
-            modalContentWrapper.innerHTML = `<div class="p-8 text-center text-danger">Ocorreu um erro ao carregar o formulário. Tente novamente.</div>`;
+            formModalContent.innerHTML = `<div class="p-8 text-center text-red-500">Ocorreu um erro ao carregar o formulário. Tente novamente.</div>`;
         }
     }
 
@@ -215,6 +161,7 @@
         event.preventDefault();
         const form = event.target;
         const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
         submitButton.disabled = true;
         submitButton.innerHTML = `Enviando...`;
 
@@ -224,31 +171,61 @@
                 body: new FormData(form)
             });
             const result = await response.json();
+            
+            closeModal('formModal');
+            showResultModal(result.status, result.message);
 
-            if (result.status === 'success') {
-                closeModal();
-                alert(result.message); // Ou pode usar um toast de sucesso
-            } else {
-                alert(result.message); // Mostra o erro (ex: e-mail duplicado)
-                submitButton.disabled = false;
-                submitButton.innerHTML = 'Finalizar Pré-inscrição';
-            }
         } catch (error) {
-            alert('Ocorreu um erro de rede. Por favor, tente novamente.');
-            submitButton.disabled = false;
-            submitButton.innerHTML = 'Finalizar Pré-inscrição';
+            showResultModal('error', 'Ocorreu um erro de rede. Por favor, tente novamente.');
+        } finally {
+            if(submitButton){
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            }
         }
     }
 
-    function closeModal(event) {
-        // Fecha o modal apenas se o clique for no fundo escuro
-        if (!event || event.target === modal) {
-            modalContentWrapper.classList.add('scale-95');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                modalContentWrapper.innerHTML = ''; // Limpa o conteúdo
-            }, 300);
+    function showResultModal(status, message) {
+        let iconHtml = '';
+        if (status === 'success') {
+            iconHtml = `<div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h3 class="text-2xl font-bold mb-2">Sucesso!</h3>`;
+        } else {
+            iconHtml = `<div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"><svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></div><h3 class="text-2xl font-bold mb-2">Ocorreu um Erro</h3>`;
+        }
+        
+        resultModalContent.innerHTML = `${iconHtml}<p class="text-gray-600 mb-6">${message}</p><button onclick="closeModal('resultModal')" class="w-full bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-xl hover:bg-gray-300">Fechar</button>`;
+        
+        resultModal.classList.remove('hidden');
+        resultModal.classList.add('flex');
+        setTimeout(() => resultModal.querySelector('div').classList.remove('scale-95'), 10);
+    }
+
+    function closeModal(modalId, event) {
+        const modalToClose = document.getElementById(modalId);
+        if (!event || event.target === modalToClose) {
+            const contentWrapper = modalToClose.querySelector('div[id^="modal-content"]');
+            if(contentWrapper){
+                contentWrapper.classList.add('scale-95');
+                setTimeout(() => {
+                    modalToClose.classList.add('hidden');
+                    modalToClose.classList.remove('flex');
+                    if (modalId === 'formModal') {
+                        formModalContent.innerHTML = '';
+                    }
+                }, 300);
+            } else {
+                 const resultWrapper = modalToClose.querySelector('#result-modal-content');
+                 if(resultWrapper) {
+                    resultWrapper.classList.add('scale-95');
+                    setTimeout(() => {
+                        modalToClose.classList.add('hidden');
+                        modalToClose.classList.remove('flex');
+                    }, 300);
+                 } else {
+                    modalToClose.classList.add('hidden');
+                    modalToClose.classList.remove('flex');
+                 }
+            }
         }
     }
 </script>

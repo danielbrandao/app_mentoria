@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}Formulário de Interesse{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-lg-8">
+    <div class="text-center mb-5">
+        <h1>Formulário de Interesse</h1>
+        <p class="lead text-white-50">Preencha os seus dados para garantir a sua vaga na lista de espera.</p>
+    </div>
+    <div class="card shadow-sm"><div class="card-body p-4">
+        <form method="POST" action="">
+            <!-- Campos comuns: nome, email, whatsapp, etc. -->
+            <div class="mb-3"><label class="form-label">Nome Completo</label><input type="text" name="nome" class="form-control" required></div>
+            <!-- ... outros campos do formulário ... -->
+
+            <hr class="my-4">
+            
+            <!-- Campo de seleção de interesse principal -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">Qual a sua opção de interesse principal?</label>
+                {% for produto in produtos %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="produto_interesse_id" id="produto-{{ produto.id }}" value="{{ produto.id }}" {% if loop.first %}checked{% endif %}>
+                    <label class="form-check-label" for="produto-{{ produto.id }}">
+                        <strong>{{ produto.nome }}</strong> - <small>{{ produto.descricao }}</small>
+                    </label>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="d-grid"><button type="submit" class="btn btn-primary btn-lg">Manifestar Interesse</button></div>
+        </form>
+    </div></div>
+</div></div>
+{% endblock %}
