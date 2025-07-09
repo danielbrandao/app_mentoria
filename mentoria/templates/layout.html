@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="pt-br" class="h-100" data-bs-theme="dark">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/icone_desenvolvedor.ico') }}">    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <title>Plataforma de Mentoria | {% block title %}{% endblock %}</title>
+
+    <!-- ESTILOS CORRIGIDOS PARA O LAYOUT "NETFLIX" -->
+    <style>
+        :root {
+            --primary-glow: #00aaff;
+            --secondary-glow: #aa00ff;
+            --background-start: #0f0c29;
+            --background-mid: #302b63;
+            --background-end: #24243e;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--background-start), var(--background-mid), var(--background-end));
+            background-attachment: fixed;
+            color: #e9ecef;
+        }
+
+        .navbar {
+            background-color: rgba(10, 10, 20, 0.7) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* ESTILOS PARA O CARROSSEL DE CONTEÚDO */
+        .module-title {
+            font-weight: bold;
+            font-size: 1.75rem;
+            padding-left: 1rem;
+            border-left: 4px solid var(--primary-glow);
+        }
+
+        .content-carousel {
+            display: flex;
+            overflow-x: auto; /* Permite o scroll horizontal */
+            scroll-behavior: smooth;
+            padding: 1rem;
+            margin: 0 -1rem; /* Compensa o padding do container */
+            gap: 1.5rem; /* Espaço entre os cards */
+        }
+        
+        /* Estiliza a barra de scroll */
+        .content-carousel::-webkit-scrollbar { height: 8px; }
+        .content-carousel::-webkit-scrollbar-thumb { background: #495057; border-radius: 10px; }
+
+        .content-card {
+            flex: 0 0 auto; /* Impede que o card estique */
+            width: 240px; /* Largura fixa para os cards */
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background-color: #212529;
+            border: 1px solid #343a40;
+        }
+        .content-card:hover {
+            transform: scale(1.05) translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .content-card a { text-decoration: none; color: inherit; }
+        
+        .content-card .card-img-top {
+            aspect-ratio: 3 / 4; /* Proporção vertical, como na referência */
+            object-fit: cover;
+        }
+        
+        .content-card .card-body { padding: 1rem; }
+        .content-card .card-title { font-size: 1rem; font-weight: bold; margin-bottom: 0.25rem; }
+        .content-card .card-text { font-size: 0.85rem; color: #adb5bd; }
+    </style>
+</head>
+<body class="d-flex flex-column h-100">
+    
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">
+                <i class="bi bi-bar-chart-line-fill"></i>
+                Super+
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.is_admin %}
+                        <li class="nav-item">
+                            <a class="nav-link text-warning" href="{{ url_for('admin.admin_dashboard') }}">
+                                <i class="bi bi-gear-fill"></i> Painel Admin
+                            </a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.area_membros') }}"><i class="bi bi-person-circle"></i> Área de Membros</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.logout') }}"><i class="bi bi-box-arrow-right"></i> Sair</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.login') }}"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-shrink-0">
+        <div class="container my-5">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer mt-auto py-3 text-white-50" style="background-color: rgba(10, 10, 20, 0.7);">
+        <div class="container text-center">
+            <span>Plataforma SUPER+ © 2025</span>
+        </div>
+    </footer>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

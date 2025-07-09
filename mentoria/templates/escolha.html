@@ -1,0 +1,232 @@
+{% extends "layout2.html" %}
+
+{% block title %}Escolha a sua Jornada{% endblock %}
+
+{% block content %}
+<!-- Script para carregar o Tailwind CSS (necessário para esta página) -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Estilos personalizados para a página e para o modal -->
+<style>
+    body { background: #000 !important; }
+    .card-hover { transition: all 0.3s ease; }
+    .card-hover:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+    .pulse-animation { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+</style>
+
+<!-- Header -->
+<header class="text-center pt-12 pb-8">
+    <div class="max-w-4xl mx-auto px-6">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">Transforme a sua Carreira</h1>
+        <p class="text-xl text-white/90 font-light">Escolha a jornada perfeita para o seu crescimento profissional</p>
+    </div>
+</header>
+
+<!-- Conteúdo Principal com os Cards -->
+<main class="max-w-6xl mx-auto px-6 pb-16">
+    <div class="grid md:grid-cols-3 gap-8">
+        
+        <!-- Card 1: Mentoria DEV+ -->
+        <div class="card-hover bg-white rounded-2xl p-8 shadow-xl flex flex-col border-2 border-blue-500">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-code-slash text-3xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Mentoria DEV+</h2>
+                <p class="text-gray-600 leading-relaxed">Acelere a sua carreira em Dev e Dados com mentoria personalizada e projetos práticos.</p>
+            </div>
+            <div class="space-y-3 mb-8 flex-grow">
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Estruturação de Currículo e Portfólio</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Plano de carreira e preparação para entrevistas</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Participação em Projetos reais</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Sessões com especialistas na área</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Comunidade exclusiva de programadores</div>
+            </div>
+            <a href="{{ url_for('main.inscricao_dev') }}" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 text-center mt-auto">
+                Inscrição DEV+
+            </a>
+        </div>
+
+        <!-- Card 2: Formação IA para Educadores -->
+        <div class="card-hover bg-white rounded-2xl p-8 shadow-xl border-green-400 border-2 flex flex-col relative">
+            <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                <span class="bg-green-400 text-green-900 px-4 py-1 rounded-full text-sm font-semibold">
+                    INÍCIO IMEDIATO
+                </span>
+            </div>
+            <div class="text-center mb-6 mt-4">
+                <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-book-half text-3xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Formação IA.edu </h2>
+                <p class="text-gray-600 leading-relaxed">Curso completo para educadores que querem integrar IA nas suas práticas pedagógicas.</p>
+            </div>
+            <div class="space-y-3 mb-8 flex-grow">
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Módulos estruturados e práticos</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Templates e Modelos prontos para uso</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Módulos sobre Metodologias Ativas</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Certificação inclusa</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Acesso às atualizações durante 12 meses</div>
+            </div>
+            <a href="{{ url_for('main.formulario_interesse_educadores') }}" class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 text-center mt-auto">
+                Escolher Formação IA.edu
+            </a>
+        </div>
+
+        <!-- Card 3: Mentoria IA.edu -->
+        <div class="card-hover bg-white rounded-2xl p-8 shadow-xl border-2 border-yellow-400 flex flex-col">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="bi bi-robot text-3xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Mentoria IA.edu</h2>
+                <p class="text-gray-600 leading-relaxed">Domine a Inteligência Artificial aplicada à educação e revolucione a sua forma de ensinar.</p>
+            </div>
+            <div class="space-y-3 mb-8 flex-grow">
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Uso de IA para criação de conteúdos</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Acesso completo ao curso IA.Edu</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Sessões ao vivo com especialistas</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Preparação para aulas e práticas em didática</div>
+                <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Comunidade exclusiva de educadores</div>
+            </div>
+            <a href="{{ url_for('main.formulario_interesse_educadores') }}" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 text-center mt-auto">
+                Escolher Mentoria IA.edu
+            </a>
+        </div>
+    </div>
+</main>
+
+<!-- MODAL PARA CARREGAR O FORMULÁRIO -->
+<div id="formModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4" onclick="closeModal('formModal', event)">
+    <div id="modal-content-wrapper" class="bg-gray-100 text-gray-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-all duration-300" onclick="event.stopPropagation()">
+        <!-- O conteúdo do formulário será injetado aqui -->
+    </div>
+</div>
+
+<!-- NOVO MODAL PARA EXIBIR MENSAGENS DE SUCESSO/ERRO -->
+<div id="resultModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4" onclick="closeModal('resultModal', event)">
+    <div id="result-modal-content" class="bg-white text-gray-800 rounded-2xl p-8 max-w-md mx-4 text-center transform scale-95 transition-all duration-300" onclick="event.stopPropagation()">
+        <!-- O conteúdo do resultado será injetado aqui -->
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const formModal = document.getElementById('formModal');
+    const formModalContent = document.getElementById('modal-content-wrapper');
+    const resultModal = document.getElementById('resultModal');
+    const resultModalContent = document.getElementById('result-modal-content');
+
+    async function openFormModal(formType) {
+        let url = '';
+        if (formType === 'dev') {
+            url = "{{ url_for('main.inscricao_dev') }}";
+        } else {
+            url = "{{ url_for('main.inscricao_ia_edu') }}";
+        }
+
+        modalContentWrapper.innerHTML = `<div class="p-8 text-center"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div><p class="mt-4">A carregar...</p></div>`;
+        formModal.classList.remove('hidden');
+        formModal.classList.add('flex');
+        setTimeout(() => formModalContent.classList.remove('scale-95'), 10);
+
+        try {
+            const response = await fetch(url);
+            const html = await response.text();
+            
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const formContent = doc.querySelector('.row.justify-content-center');
+
+            if (formContent) {
+                formModalContent.innerHTML = '';
+                formModalContent.appendChild(formContent);
+                
+                const form = formModalContent.querySelector('form');
+                if (form) {
+                    form.addEventListener('submit', handleFormSubmit);
+                }
+            } else {
+                throw new Error('Conteúdo do formulário não encontrado.');
+            }
+        } catch (error) {
+            formModalContent.innerHTML = `<div class="p-8 text-center text-red-500">Ocorreu um erro ao carregar o formulário. Tente novamente.</div>`;
+        }
+    }
+
+    async function handleFormSubmit(event) {
+        event.preventDefault();
+        const form = event.target;
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.disabled = true;
+        submitButton.innerHTML = `Enviando...`;
+
+        try {
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            });
+            const result = await response.json();
+            
+            closeModal('formModal');
+            showResultModal(result.status, result.message);
+
+        } catch (error) {
+            showResultModal('error', 'Ocorreu um erro de rede. Por favor, tente novamente.');
+        } finally {
+            if(submitButton){
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonText;
+            }
+        }
+    }
+
+    function showResultModal(status, message) {
+        let iconHtml = '';
+        if (status === 'success') {
+            iconHtml = `<div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"><svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg></div><h3 class="text-2xl font-bold mb-2">Sucesso!</h3>`;
+        } else {
+            iconHtml = `<div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4"><svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></div><h3 class="text-2xl font-bold mb-2">Ocorreu um Erro</h3>`;
+        }
+        
+        resultModalContent.innerHTML = `${iconHtml}<p class="text-gray-600 mb-6">${message}</p><button onclick="closeModal('resultModal')" class="w-full bg-gray-200 text-gray-800 font-semibold py-3 px-6 rounded-xl hover:bg-gray-300">Fechar</button>`;
+        
+        resultModal.classList.remove('hidden');
+        resultModal.classList.add('flex');
+        setTimeout(() => resultModal.querySelector('div').classList.remove('scale-95'), 10);
+    }
+
+    function closeModal(modalId, event) {
+        const modalToClose = document.getElementById(modalId);
+        if (!event || event.target === modalToClose) {
+            const contentWrapper = modalToClose.querySelector('div[id^="modal-content"]');
+            if(contentWrapper){
+                contentWrapper.classList.add('scale-95');
+                setTimeout(() => {
+                    modalToClose.classList.add('hidden');
+                    modalToClose.classList.remove('flex');
+                    if (modalId === 'formModal') {
+                        formModalContent.innerHTML = '';
+                    }
+                }, 300);
+            } else {
+                 const resultWrapper = modalToClose.querySelector('#result-modal-content');
+                 if(resultWrapper) {
+                    resultWrapper.classList.add('scale-95');
+                    setTimeout(() => {
+                        modalToClose.classList.add('hidden');
+                        modalToClose.classList.remove('flex');
+                    }, 300);
+                 } else {
+                    modalToClose.classList.add('hidden');
+                    modalToClose.classList.remove('flex');
+                 }
+            }
+        }
+    }
+</script>
+{% endblock %}

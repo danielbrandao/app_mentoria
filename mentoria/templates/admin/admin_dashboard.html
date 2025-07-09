@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block title %}Painel do Administrador{% endblock %}
+{% block content %}
+<h1 class="mb-4 display-6">Dashboard</h1>
+
+<!-- Secção de Status Cards -->
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h5>Mentorados Ativos</h5>
+            <!-- Exibe a variável que veio da rota -->
+            <p class="stat-number">{{ total_registros }}</p> 
+            <p class="text-muted mb-0">Total de utilizadores registados</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h5>Módulos Publicados</h5>
+            <p class="stat-number">{{ total_modulos }}</p>
+            <p class="text-muted mb-0">Total de módulos de conteúdo criados</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <h5>Turmas Ativas</h5>
+            <p class="stat-number">{{ total_turmas_ativas }}</p>
+            <p class="text-muted mb-0">Turmas atualmente em andamento</p>
+        </div>
+    </div>
+</div>
+
+<!-- Secção de Acesso Rápido -->
+<h3 class="mb-3">Acesso Rápido</h3>
+<div class="list-group">
+    <a href="{{ url_for('admin.admin_lista_inscricoes') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        <div><i class="bi bi-people-fill me-2"></i><strong>Gerir Inscrições</strong></div><i class="bi bi-chevron-right"></i>
+    </a>
+    <a href="{{ url_for('admin.admin_lista_turmas') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        <div><i class="bi bi-collection-fill me-2"></i><strong>Gerir Turmas</strong></div><i class="bi bi-chevron-right"></i>
+    </a>
+    <a href="{{ url_for('admin.admin_lista_modulos') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        <div><i class="bi bi-collection-play-fill me-2"></i><strong>Gerir Módulos e Conteúdos</strong></div><i class="bi bi-chevron-right"></i>
+    </a>
+    <a href="{{ url_for('admin.admin_lista_monitores') }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        <div><i class="bi bi-person-video me-2"></i><strong>Gerir Monitores</strong></div><i class="bi bi-chevron-right"></i>
+    </a>
+</div>
+{% endblock %}

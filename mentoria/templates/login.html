@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block title %}Login de Acesso{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="card-title text-center mb-4">Acessar a Plataforma</h3>
+                
+                <!-- O formulário agora aponta para a rota correta do blueprint -->
+                <form method="POST" action="{{ url_for('main.login') }}">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Senha</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    
+                    <!-- CHECKBOX "LEMBRAR DE MIM" E LINK PARA RECUPERAR SENHA -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">Lembrar de mim</dlabel>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('main.reset_password_request') }}" class="form-text text-decoration-none">Esqueceu a senha?</a>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Entrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

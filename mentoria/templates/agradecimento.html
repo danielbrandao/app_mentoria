@@ -1,0 +1,41 @@
+{% extends "layout2.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="text-center mb-5">
+            <i class="bi bi-robot fs-1 text-warning"></i>
+            <h1>{{ titulo }}</h1>
+            <p class="lead text-white-50">Feito! Obrigado por demonstrar interesse. 
+                Em breve entraremos em contato com você para mais informações.
+            </p>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                Por enquanto, acesse nosso material de boas-vindas:<br>
+                <ul>
+                    <li><a href="https://" target="_blank">Check-list de carreira DEV+ (para área de tecnologia)</a></li>
+                    <li><a href="https://" target="_blank">Guia de carreira em Dados (para área de dados)</a></li>
+                
+                </ul>
+            </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PARA EXIBIR MENSAGEM DE SUCESSO/ERRO -->
+<div id="resultModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <div id="modal-icon-container" class="mb-3"></div>
+                <h4 id="modal-title" class="mb-2"></h4>
+                <p id="modal-message" class="text-muted"></p>
+                <button id="modal-close-button" type="button" class="btn btn-secondary w-100" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

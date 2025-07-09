@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+{% block title %}{{ conteudo.titulo }}{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h1 class="display-6">{{ conteudo.titulo }}</h1>
+        <p class="text-muted mb-0">Do módulo: {{ conteudo.modulo.titulo }}</p>
+    </div>
+    <a href="{{ url_for('main.area_membros') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Voltar para a Área de Membros</a>
+</div>
+<hr>
+
+<div class="row g-4">
+    <!-- Coluna principal com o leitor de vídeo -->
+    <div class="col-lg-9">
+        {% if conteudo.tipo == 'Vídeo' %}
+            <!-- Container responsivo para o vídeo -->
+            <div class="ratio ratio-16x9">
+                <iframe src="{{ embed_url }}" allow="autoplay" allowfullscreen style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+
+        {% else %}
+            <!-- Fallback para outros tipos de conteúdo -->
+            <div class="text-center p-5 border rounded d-flex flex-column align-items-center justify-content-center" style="min-height: 300px;">
+                <i class="bi 
+                {% if conteudo.tipo == 'PDF' %}bi-file-earmark-pdf-fill{% 
+                elif conteudo.tipo == 'Slides' %}bi-file-earmark-slides-fill{% 
+                else %}bi-link-45deg{% endif %} display-1 mb-3"></i>
+                <h2>Este conteúdo é um {{ conteudo.tipo }}.</h2>
+                <p>Clique no botão abaixo para o abrir numa nova aba.</p>
+                <!-- ESTA É A LINHA QUE FOI CORRIGIDA -->
+                <a href="{{ conteudo.url_conteudo }}" class="btn btn-primary" target="_blank">Abrir Conteúdo</a>
+            </div>
+        {% endif %}
+        
+        <div class="mt-4">
+            <h4>Descrição</h4>
+            <p>{{ conteudo.descricao|safe or "Nenhuma descrição disponível." }}</p>
+        </div>
+    </div>
+
+    <!-- Barra lateral com outros conteúdos do módulo -->
+    <div class="col-lg-3">
+        <h4>Neste Módulo</h4>
+        <div class="list-group">
+            {% for item in conteudo.modulo.conteudos|sort(attribute='ordem') %}
+                <a href="{{ url_for('admin.ver_conteudo', id=item.id) }}" class="list-group-item list-group-item-action {% if item.id == conteudo.id %}active{% endif %}">
+                    <i class="bi 
+                    {% if item.tipo == 'Vídeo' %}bi-play-btn-fill{% 
+                    elif item.tipo == 'PDF' %}bi-file-earmark-pdf-fill{% 
+                    elif item.tipo == 'Slides' %}bi-file-earmark-slides-fill{%
+                    else %}bi-link-45deg{% endif %} me-2"></i>
+                    {{ item.titulo }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+{% block content %}
+<h1 class="mb-4">{{ titulo }}</h1>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="POST" action="" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Título do Conteúdo</label>
+                <input type="text" name="titulo" class="form-control" value="{{ conteudo.titulo }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">URL</label>
+                <input type="url" name="url_conteudo" class="form-control" value="{{ conteudo.url_conteudo }}" required>
+            </div>
+            <hr>
+            <p class="text-muted text-center small">Para a imagem de capa, pode fazer um novo upload ou alterar a URL.</p>
+            
+            {% if conteudo.thumbnail_url %}
+            <div class="mb-2">
+                <small>Capa Atual:</small><br>
+                <img src="{{ conteudo.thumbnail_url }}" alt="Thumbnail atual" style="max-height: 100px; border-radius: 0.25rem;">
+            </div>
+            {% endif %}
+
+            <div class="mb-3">
+                <label class="form-label">1. Fazer Upload de Nova Imagem (substitui a atual)</label>
+                <input type="file" name="thumbnail_file" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">2. Usar ou Editar URL de Imagem Externa</label>
+                <input type="url" name="thumbnail_url" class="form-control" value="{{ conteudo.thumbnail_url if conteudo.thumbnail_url and 'http' in conteudo.thumbnail_url else '' }}">
+                <div class="form-text">O upload tem prioridade sobre a URL.</div>
+            </div>
+            <!-- CAMPO NOVO ADICIONADO -->
+            <div class="mb-3">
+                <label class="form-label">URL da Thumbnail (Opcional)</label>
+                <input type="url" name="thumbnail_url" class="form-control" value="{{ conteudo.thumbnail_url if conteudo.thumbnail_url else '' }}">
+            </div>
+            <div class="row">
+                <div class="col-sm-7">
+                    <label class="form-label">Tipo</label>
+                    <select name="tipo" class="form-select"><option {% if conteudo.tipo == 'Vídeo' %}selected{% endif %}>Vídeo</option><option {% if conteudo.tipo == 'PDF' %}selected{% endif %}>PDF</option><option {% if conteudo.tipo == 'Slides' %}selected{% endif %}>Slides</option><option {% if conteudo.tipo == 'Link Externo' %}selected{% endif %}>Link Externo</option></select>
+                </div>
+                <div class="col-sm-5">
+                    <label class="form-label">Ordem de Exibição</label>
+                    <input type="number" name="ordem" class="form-control" value="{{ conteudo.ordem }}">
+                </div>
+            </div>
+            <div class="mt-3">
+                <label class="form-label">Descrição</label>
+                <textarea name="descricao" class="form-control" rows="3">{{ conteudo.descricao }}</textarea>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-end">
+                <a href="{{ url_for('admin.admin_detalhes_modulo', id=conteudo.modulo_id) }}" class="btn btn-secondary me-2">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

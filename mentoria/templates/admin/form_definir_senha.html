@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block title %}Definir Senha{% endblock %}
+{% block content %}
+<h1 class="mb-4">Definir Senha</h1>
+<h5 class="text-muted mb-4">Para o mentorado: {{ mentorado.nome }}</h5>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form method="POST" action="">
+            <div class="mb-3">
+                <label for="senha" class="form-label">Nova Senha</label>
+                <input type="password" class="form-control" id="senha" name="senha" required>
+            </div>
+            <div class="mb-3">
+                <label for="confirmacao_senha" class="form-label">Confirme a Nova Senha</label>
+                <input type="password" class="form-control" id="confirmacao_senha" name="confirmacao_senha" required>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-end">
+                <a href="{{ url_for('admin.admin_detalhe_inscricao', id=mentorado.id) }}" class="btn btn-secondary me-2">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Salvar Nova Senha</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

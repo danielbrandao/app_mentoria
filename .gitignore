@@ -13,3 +13,7 @@ __pycache__/
 .vscode/
 .idea/
 .DS_Store
+
+static/uploads/
+
+.env

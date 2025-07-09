@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}Gerir Módulos{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">Gerir Módulos</h1>
+    <a href="{{ url_for('admin.admin_novo_modulo') }}" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Criar Novo Módulo</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead><tr><th>Ordem</th><th>Título do Módulo</th><th>Descrição</th><th class="text-end">Ações</th></tr></thead>
+                <tbody>
+                    {% for modulo in modulos %}
+                    <tr>
+                        <td><span class="badge bg-secondary">{{ modulo.ordem }}</span></td>
+                        <td><strong>{{ modulo.titulo }}</strong></td>
+                        <td>{{ modulo.descricao|truncate(80) }}</td>
+                        <td class="text-end">
+                            <a href="{{ url_for('admin.admin_detalhes_modulo', id=modulo.id) }}" class="btn btn-sm btn-outline-primary" title="Gerir Conteúdos"><i class="bi bi-plus-square"></i> Conteúdos</a>
+                            <a href="{{ url_for('admin.admin_editar_modulo', id=modulo.id) }}" class="btn btn-sm btn-outline-secondary" title="Editar Módulo"><i class="bi bi-pencil-square"></i> Editar</a>
+                            <form action="{{ url_for('admin.admin_deletar_modulo', id=modulo.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem a certeza? Apagar um módulo também removerá todos os seus conteúdos.');"><button type="submit" class="btn btn-sm btn-outline-danger" title="Remover Módulo"><i class="bi bi-trash"></i></button></form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center p-4">Nenhum módulo criado ainda.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

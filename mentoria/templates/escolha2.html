@@ -1,0 +1,307 @@
+
+{% extends "layout.html" %}
+{% block title %}Escolha sua Jornada{% endblock %}
+
+{% block content %}
+<!-- Script para carregar o Tailwind CSS (necessário para esta página) -->
+<script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #000;
+        }
+        
+        .gradient-bg {
+           /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .tech-pattern {
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 2px, transparent 2px),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 2px, transparent 2px);
+            background-size: 50px 50px;
+        }
+    </style>
+<div class="min-h-screen gradient-bg tech-pattern">
+    <!-- Header -->
+    <header class="text-center pt-12 pb-8">
+        <div class="max-w-4xl mx-auto px-6">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                Transforme sua Carreira
+            </h1>
+            <p class="text-xl text-white/90 font-light">
+                Escolha a jornada perfeita para o seu crescimento profissional
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-6xl mx-auto px-6 pb-16">
+        <div class="grid md:grid-cols-3 gap-8">
+            
+            <!-- Mentoria DEV+ -->
+            <div class="card-hover bg-white rounded-2xl p-8 shadow-xl">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Mentoria DEV+</h2>
+                    <p class="text-gray-600 leading-relaxed">
+                        Acelere sua carreira em desenvolvimento de software com mentoria personalizada e projetos práticos
+                    </p>
+                </div>
+                
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Mentoria 1:1 personalizada
+                    </div>
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Projetos reais do mercado
+                    </div>
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Suporte para carreira tech
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('main.inscricao_dev') }}" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 text-center">
+                    Escolher DEV+
+                </a>
+            </div>
+
+            <!-- Mentoria IA.edu -->
+            <div class="card-hover bg-white rounded-2xl p-8 shadow-xl border-2 border-yellow-400">
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-yellow-400 text-yellow-900 px-4 py-1 rounded-full text-sm font-semibold pulse-animation">
+                        MAIS POPULAR
+                    </span>
+                </div>
+                
+                <div class="text-center mb-6 mt-4">
+                    <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Mentoria IA.edu</h2>
+                    <p class="text-gray-600 leading-relaxed">
+                        Domine a Inteligência Artificial aplicada à educação e revolucione sua forma de ensinar
+                    </p>
+                </div>
+                
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        IA para criação de conteúdo
+                    </div>
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Automação educacional
+                    </div>
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Ferramentas práticas
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('main.inscricao_ia_edu') }}" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 text-center">
+                    Escolher IA.edu
+                </a>
+            </div>
+
+            <!-- Formação IA para Educadores -->
+            <div class="card-hover bg-white rounded-2xl p-8 shadow-xl">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Formação IA para Educadores</h2>
+                    <p class="text-gray-600 leading-relaxed">
+                        Curso completo para educadores que querem integrar IA em suas práticas pedagógicas
+                    </p>
+                </div>
+                
+                <div class="space-y-3 mb-8">
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Módulos estruturados
+                    </div>
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Certificação inclusa
+                    </div>
+                    <div class="flex items-center text-gray-700">
+                        <svg class="w-5 h-5 text-green-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        Comunidade de educadores
+                    </div>
+                </div>
+                
+                <a href="{{ url_for('main.inscricao_ia_edu') }}" class="w-full bg-gradient-to-r from-green-500 to-teal-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-green-600 hover:to-teal-700 transition-all duration-300 transform hover:scale-105 text-center">
+                    Escolher Formação
+                </a>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div class="text-center mt-16">
+            <p class="text-white/80 text-lg mb-6">
+                Ainda tem dúvidas? Fale conosco!
+            </p>
+            <button onclick="contactUs()" class="bg-white/20 backdrop-blur-sm text-white border-2 border-white/30 font-semibold py-3 px-8 rounded-xl hover:bg-white/30 transition-all duration-300">
+                💬 Entrar em Contato
+            </button>
+        </div>
+    </main>
+
+    <!-- Modal de Confirmação -->
+    <div id="confirmModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4 transform scale-95 transition-all duration-300">
+            <div class="text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Ótima Escolha!</h3>
+                <p id="modalText" class="text-gray-600 mb-6"></p>
+                <div class="space-y-3">
+                    <button onclick="proceedToProgram()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-3 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300">
+                        Continuar
+                    </button>
+                    <button onclick="closeModal()" class="w-full bg-gray-100 text-gray-700 font-semibold py-3 px-6 rounded-xl hover:bg-gray-200 transition-all duration-300">
+                        Voltar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedOption = '';
+        
+        function selectOption(option) {
+            selectedOption = option;
+            const modal = document.getElementById('confirmModal');
+            const modalText = document.getElementById('modalText');
+            
+            let programName = '';
+            let description = '';
+            
+            switch(option) {
+                case 'dev':
+                    programName = 'Mentoria DEV+';
+                    description = 'Você escolheu acelerar sua carreira em desenvolvimento. Prepare-se para uma jornada transformadora!';
+                    break;
+                case 'ia-edu':
+                    programName = 'Mentoria IA.edu';
+                    description = 'Você escolheu dominar a IA na educação. Vamos revolucionar sua forma de ensinar!';
+                    break;
+                case 'formacao':
+                    programName = 'Formação IA para Educadores';
+                    description = 'Você escolheu nossa formação completa. Prepare-se para se tornar um educador do futuro!';
+                    break;
+            }
+            
+            modalText.textContent = description;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Animação de entrada
+            setTimeout(() => {
+                modal.querySelector('.bg-white').classList.remove('scale-95');
+                modal.querySelector('.bg-white').classList.add('scale-100');
+            }, 10);
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.querySelector('.bg-white').classList.add('scale-95');
+            modal.querySelector('.bg-white').classList.remove('scale-100');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+        
+        function proceedToProgram() {
+            // Aqui você pode redirecionar para a página específica do programa
+            alert(`Redirecionando para ${selectedOption}... (Aqui você adicionaria a URL de destino)`);
+            closeModal();
+        }
+        
+        function contactUs() {
+            alert('Aqui você pode adicionar um link para WhatsApp, formulário de contato ou chat!');
+        }
+        
+        // Fechar modal clicando fora
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // Animações de entrada na página
+        window.addEventListener('load', function() {
+            const cards = document.querySelectorAll('.card-hover');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(30px)';
+                    card.style.transition = 'all 0.6s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 100);
+                }, index * 200);
+            });
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'95963ed184fd6f8b',t:'MTc1MTU0NDI2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+{% endblock %}
+
