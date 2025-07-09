@@ -11,7 +11,7 @@ def send_email(to, subject, template, **kwargs):
     """Função genérica para enviar e-mails."""
     app = current_app._get_current_object()
     msg = Message(subject,
-                  sender=f"Plataforma Mentoria <{app.config['MAIL_USERNAME']}>",
+                  sender=f"Plataforma SUPER+ <{app.config['MAIL_USERNAME']}>",
                   recipients=[to])
     msg.body = render_template(template + '.txt', **kwargs)
     msg.html = render_template(template + '.html', **kwargs)

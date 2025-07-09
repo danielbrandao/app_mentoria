@@ -7,7 +7,7 @@ Um novo lead manifestou interesse!
 - WhatsApp: {{ lead.whatsapp }}
 - Interesse Principal: {{ produto.nome }}
 
-Por favor, entre em contacto para os próximos passos.
+Por favor, entre em contato para os próximos passos.
 
 Atenciosamente,
-Plataforma de Mentoria
+Plataforma SUPER+

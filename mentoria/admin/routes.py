@@ -1,13 +1,25 @@
 from . import admin
 
-from flask import render_template, redirect, url_for, flash, request
+from flask import render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_required, current_user
 from mentoria import db
-from mentoria.models import Registros, Turmas, Modulos, Conteudos, Avisos, Monitores, Encontros
+from mentoria.models import Registros, Turmas, Modulos, Conteudos, Avisos, Monitores, Encontros, Produtos
 from datetime import datetime
+from sqlalchemy import or_
+import time
+from werkzeug.utils import secure_filename
+import os
+
+
 
 from . import admin # Importa o próprio blueprint
 from .utils import admin_required # Vamos criar este decorador
+
+def allowed_file(filename):
+    """Verifica se a extensão do ficheiro está na lista de extensões permitidas."""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
+
 
 # --- ROTAS DO PAINEL DE ADMINISTRAÇÃO ---
 
@@ -16,36 +28,53 @@ from .utils import admin_required # Vamos criar este decorador
 @admin_required # Protegida para administradores
 def admin_lista_inscricoes():
     """
-    Página principal que lista os inscritos com filtros.
+    Lista e filtra todos os registos, agora com busca e filtros baseados nos novos modelos.
     """
+    page = request.args.get('page', 1, type=int)
     query = Registros.query
     
-    filtro_perfil = request.args.get('perfil', '')
-    filtro_desafio = request.args.get('desafio', '')
-    filtro_disponibilidade = request.args.get('disponibilidade', '')
+    # Obtém os valores dos filtros da URL
+    filtro_busca = request.args.get('busca', '')
+    filtro_perfil = request.args.get('perfil_detalhado', '')
+    filtro_produto = request.args.get('produto', '') # Mudámos o nome do filtro para 'produto'
 
+    # Lógica de busca por texto
+    if filtro_busca:
+        query = query.filter(or_(Registros.nome.ilike(f'%{filtro_busca}%'), Registros.email.ilike(f'%{filtro_busca}%')))
+
+    # Lógica de filtro por perfil detalhado
     if filtro_perfil:
-        query = query.filter(Registros.perfil == filtro_perfil)
-    if filtro_desafio:
-        query = query.filter(Registros.desafio == filtro_desafio)
-    if filtro_disponibilidade:
-        query = query.filter(Registros.disponibilidade.like(f'%{filtro_disponibilidade}%'))
+        query = query.filter(Registros.perfil_detalhado == filtro_perfil)
 
-    dados_filtrados = query.order_by(Registros.data_inscricao.desc()).all()
+    # --- LÓGICA DE FILTRO POR PRODUTO CORRIGIDA ---
+    if filtro_produto:
+        # Faz um "join" com a tabela Produtos para filtrar pelo nome do produto
+        query = query.join(Produtos).filter(Produtos.nome == filtro_produto)
+
+    # Paginação
+    pagination = query.order_by(Registros.data_inscricao.desc()).paginate(
+        page=page, per_page=12, error_out=False
+    )
+    dados_paginados = pagination.items
     
-    perfis_opcoes = sorted([p[0] for p in db.session.query(Registros.perfil).distinct().all() if p[0]])
-    desafios_opcoes = sorted([d[0] for d in db.session.query(Registros.desafio).distinct().all() if d[0]])
-    disponibilidades_opcoes = ['Manhã', 'Tarde', 'Noite', 'Fim de semana']
+    # --- LÓGICA PARA OBTER OPÇÕES DE FILTRO CORRIGIDA ---
+    perfis_opcoes = sorted([p[0] for p in db.session.query(Registros.perfil_detalhado).distinct().all() if p[0]])
+    # Busca os nomes dos produtos diretamente da tabela Produtos
+    produtos_opcoes = sorted([p.nome for p in Produtos.query.all()])
     
     filtros_ativos = {
-        'perfil': filtro_perfil,
-        'desafio': filtro_desafio,
-        'disponibilidade': filtro_disponibilidade
+        'busca': filtro_busca,
+        'perfil_detalhado': filtro_perfil,
+        'produto': filtro_produto
     }
-
-    return render_template('admin/lista_inscricoes.html', dados=dados_filtrados, total=len(dados_filtrados),
-                           perfis=perfis_opcoes, desafios=desafios_opcoes,
-                           disponibilidades=disponibilidades_opcoes, filtros_ativos=filtros_ativos)
+    
+    return render_template('admin/lista_inscricoes.html', 
+                           dados=dados_paginados, 
+                           total=pagination.total,
+                           pagination=pagination,
+                           perfis=perfis_opcoes, 
+                           produtos=produtos_opcoes, # Passa a lista de nomes de produtos
+                           filtros_ativos=filtros_ativos)
 
 @admin.route('/admin/inscricao/<int:id>/detalhes')
 @admin_required
@@ -81,6 +110,20 @@ def definir_senha_mentorado(id):
 def detalhe(id):
     registro = Registros.query.get_or_404(id)
     return render_template('detalhe.html', registro=registro)
+
+# Matrícula de aluno
+@admin.route('/registro/<int:id>/matricular', methods=['POST'])
+@admin_required
+def matricular_aluno(id):
+    """Muda o status de um registro para 'Matriculado'."""
+    registro = Registros.query.get_or_404(id)
+    
+    # Altera o status e, opcionalmente, pode alocar a uma turma padrão se fizer sentido
+    registro.status = 'Matriculado'
+    
+    db.session.commit()
+    flash(f"'{registro.nome}' foi matriculado(a) com sucesso!", 'success')
+    return redirect(url_for('admin.admin_detalhe_inscricao', id=id))
 
 @admin.route('/admin/resumo')
 @admin_required
@@ -339,7 +382,7 @@ def admin_novo_conteudo(modulo_id):
         # Garante um nome de ficheiro seguro e único
         filename = str(int(time.time())) + '_' + secure_filename(file.filename)
         # Salva o ficheiro na nossa pasta de uploads
-        file.path = os.path.join(admin.config['UPLOAD_FOLDER'], filename)
+        file.path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         file.save(file.path)
         # Guarda o caminho relativo para ser usado no HTML
         thumbnail_url = f"/static/img/uploads/{filename}"
@@ -378,7 +421,7 @@ def admin_editar_conteudo(id):
         
         if file and allowed_file(file.filename):
             filename = str(int(time.time())) + '_' + secure_filename(file.filename)
-            file.path = os.path.join(admin.config['UPLOAD_FOLDER'], filename)
+            file.path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
             file.save(file.path)
             conteudo.thumbnail_url = f"/static/img/uploads/{filename}"
         else:

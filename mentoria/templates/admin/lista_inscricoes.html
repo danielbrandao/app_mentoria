@@ -1,34 +1,101 @@
 {% extends "layout.html" %}
-{% block title %}Relatório de Inscritos{% endblock %}
+{% block title %}Relatório de Inscrições{% endblock %}
+
 {% block content %}
-<div class="p-5 mb-4 bg-dark text-white rounded-3 jumbotron-bg" 
-     style="background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url([https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop](https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop));">
-    <div class="container-fluid py-5">
-        <h1 class="display-5 fw-bold"><i class="bi bi-funnel"></i> Relatório de Inscritos</h1>
-        <p class="col-md-8 fs-4">Utilize os filtros abaixo para refinar a busca por candidatos.</p>
+<div class="p-5 mb-4 rounded-3" style="background-color: rgba(0,0,0,0.2);">
+    <div class="container-fluid py-3">
+        <h1 class="display-6 fw-bold"><i class="bi bi-funnel"></i> Relatório de Inscrições</h1>
+        <p class="text-white-50">Utilize os filtros abaixo para refinar a busca por interessados.</p>
+        
         <form method="GET" action="{{ url_for('admin.admin_lista_inscricoes') }}">
-            <!-- O conteúdo do formulário de filtros vai aqui... -->
+            <div class="row g-2 align-items-end">
+                <!-- CAMPO DE BUSCA POR NOME/EMAIL -->
+                <div class="col-md-4">
+                    <label for="busca" class="form-label">Buscar por Nome ou Email</label>
+                    <input type="text" name="busca" id="busca" class="form-control" value="{{ filtros_ativos.busca or '' }}" placeholder="Digite aqui...">
+                </div>
+                <!-- FILTRO DE PROGRAMAS CORRIGIDO -->
+                <div class="col-md">
+                    <label for="produto" class="form-label">Programa de Interesse</label>
+                    <select name="produto" id="produto" class="form-select">
+                        <option value="">Todos</option>
+                        {% for produto_nome in produtos %}
+                            <option value="{{ produto_nome }}" {% if filtros_ativos.produto == produto_nome %}selected{% endif %}>{{ produto_nome }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md">
+                    <label for="perfil_detalhado" class="form-label">Perfil Detalhado</label>
+                    <select name="perfil_detalhado" id="perfil_detalhado" class="form-select">
+                        <option value="">Todos</option>
+                        {% for perfil in perfis %}<option value="{{ perfil }}" {% if filtros_ativos.perfil_detalhado == perfil %}selected{% endif %}>{{ perfil }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filtrar</button>
+                    <a href="{{ url_for('admin.admin_lista_inscricoes') }}" class="btn btn-secondary"><i class="bi bi-x-lg"></i> Limpar</a>
+                </div>
+            </div>
         </form>
     </div>
 </div>
+
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Resultados Encontrados</h3>
     <span class="badge bg-primary rounded-pill fs-6">{{ total }}</span>
 </div>
+
+<!-- Cards de exibição -->
 <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
     {% for linha in dados %}
     <div class="col">
         <div class="card h-100 shadow-sm">
             <div class="card-body d-flex flex-column">
-                <h5 class="card-title">{{ linha.nome }}</h5>
-                <h6 class="card-subtitle mb-2 text-body-secondary"><i class="bi bi-person-badge"></i> {{ linha.perfil }}</h6>
+                {% set programa = linha.produto_interesse.nome if linha.produto_interesse else 'Não especificado' %}
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="card-title mb-0">{{ linha.nome }}</h5>
+                    {% if 'DEV' in programa %}
+                        <span class="badge bg-primary">DEV</span>
+                    {% elif 'IA' in programa or 'Educadores' in programa %}
+                        <span class="badge bg-warning text-dark">EDU</span>
+                    {% endif %}
+                </div>
+                <p class="mb-1"><small class="text-white-50">Programa:</small> <strong>{{ programa }}</strong></p>
+                <p class="mb-1"><small class="text-white-50">Perfil:</small> <strong>{{ linha.perfil_detalhado or linha.perfil }}</strong></p>
                 <p class="card-text flex-grow-1"><i class="bi bi-envelope"></i> <small>{{ linha.email }}</small></p>
-                <a href="{{ url_for('admin.admin_detalhe_inscricao', id=linha.id) }}" class="btn btn-dark btn-sm mt-auto">Ver Detalhes</a>
+                <a href="{{ url_for('admin.admin_detalhe_inscricao', id=linha.id) }}" class="btn btn-outline-light btn-sm mt-auto">Ver Detalhes Completos</a>
             </div>
         </div>
     </div>
     {% else %}
-        <div class="col-12"><div class="alert alert-warning text-center">Nenhum registo encontrado.</div></div>
+        <div class="col-12"><div class="alert alert-secondary text-center">Nenhum registo encontrado com os filtros aplicados.</div></div>
     {% endfor %}
 </div>
+
+<!-- COMPONENTE DE PAGINAÇÃO -->
+<nav aria-label="Navegação de páginas" class="mt-5 d-flex justify-content-center">
+    <ul class="pagination">
+        <!-- Botão 'Anterior' -->
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.admin_lista_inscricoes', page=pagination.prev_num, **filtros_ativos) }}">Anterior</a>
+        </li>
+        
+        <!-- Links para as páginas -->
+        {% for page_num in pagination.iter_pages() %}
+            {% if page_num %}
+                <li class="page-item {% if page_num == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.admin_lista_inscricoes', page=page_num, **filtros_ativos) }}">{{ page_num }}</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+        {% endfor %}
+
+        <!-- Botão 'Próximo' -->
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link" href="{{ url_for('admin.admin_lista_inscricoes', page=pagination.next_num, **filtros_ativos) }}">Próximo</a>
+        </li>
+    </ul>
+</nav>
+
 {% endblock %}

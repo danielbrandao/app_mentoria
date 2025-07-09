@@ -1,51 +1,56 @@
 {% extends "layout.html" %}
-
 {% block title %}Detalhes de {{ registro.nome }}{% endblock %}
 
 {% block content %}
 <div class="card shadow-lg">
-    <div class="card-header bg-dark text-white">
-        <!-- Acesso aos dados do objeto 'registro' com a notação de ponto -->
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
         <h2 class="mb-0"><i class="bi bi-person-circle"></i> {{ registro.nome }}</h2>
+        {% if registro.produto_interesse %}
+            <span class="badge bg-primary fs-6">{{ registro.produto_interesse.nome }}</span>
+        {% endif %}
     </div>
     <div class="card-body">
-        <div class="row">
+        <div class="row g-5">
+            <!-- Coluna 1: Informações de Contacto e Status -->
             <div class="col-md-6">
-                <h4><i class="bi bi-info-circle"></i> Informações Principais</h4>
+                <h4><i class="bi bi-info-circle"></i> Dados Pessoais e Status</h4>
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item"><i class="bi bi-person-badge me-2"></i><strong>Perfil:</strong> {{ registro.perfil }}</li>
-                    <li class="list-group-item"><i class="bi bi-envelope-at me-2"></i><strong>Email:</strong> {{ registro.email }}</li>
-                    <li class="list-group-item"><i class="bi bi-telephone me-2"></i><strong>Fone:</strong> {{ registro.fone }}</li>
+                    <li class="list-group-item"><strong>Email:</strong> {{ registro.email }}</li>
+                    <li class="list-group-item"><strong>WhatsApp:</strong> {{ registro.whatsapp or 'Não informado' }}</li>
+                    <li class="list-group-item"><strong>Data de Inscrição:</strong> {{ registro.data_inscricao.strftime('%d/%m/%Y às %H:%M') }}</li>
+                    <li class="list-group-item"><strong>Status:</strong> <span class="badge bg-info text-dark">{{ registro.status }}</span></li>
                 </ul>
             </div>
+
+            <!-- Coluna 2: Detalhes da Aplicação -->
             <div class="col-md-6">
                 <h4><i class="bi bi-card-checklist"></i> Detalhes da Inscrição</h4>
                 <ul class="list-group list-group-flush">
-                    <!-- Formatando o objeto de data e hora para ser mais legível -->
-                    <li class="list-group-item"><i class="bi bi-calendar-event me-2"></i><strong>Data:</strong> {{ registro.data_inscricao.strftime('%d/%m/%Y às %H:%M') }}</li>
-                    <li class="list-group-item"><i class="bi bi-briefcase me-2"></i><strong>Desafio:</strong> {{ registro.desafio }}</li>
-                    <li class="list-group-item"><i class="bi bi-clock-history me-2"></i><strong>Disponibilidade:</strong> {{ registro.disponibilidade }}</li>
+                    <li class="list-group-item"><strong>Perfil:</strong> {{ registro.perfil_detalhado or registro.perfil or 'Não informado' }}</li>
+                    <li class="list-group-item"><strong>Desafio Principal:</strong> {{ registro.desafio_detalhado or registro.desafio or 'Não informado' }}</li>
+                    {% if registro.escolaridade %}<li class="list-group-item"><strong>Escolaridade:</strong> {{ registro.escolaridade }}</li>{% endif %}
                 </ul>
             </div>
         </div>
         
         <hr class="my-4">
 
-        <h4><i class="bi bi-chat-left-text"></i> Mensagem</h4>
-        <blockquote class="blockquote bg-light p-3 rounded">
-            <p class="mb-0">{{ registro.mensagem }}</p>
-        </blockquote>
+        <h4><i class="bi bi-chat-left-text"></i> Resumo da Jornada / Mensagem</h4>
+        <div class="p-3 rounded" style="background-color: rgba(255,255,255,0.05);">
+            <p class="mb-0">{{ registro.resumo_jornada or registro.mensagem or "Nenhuma mensagem fornecida." }}</p>
+        </div>
     </div>
+
+    <!-- Rodapé com Ações -->
     <div class="card-footer text-end">
-        <!-- NOVO BOTÃO PARA ADMINS -->
-        {% if current_user.is_authenticated and current_user.is_admin %}
-        <a href="{{ url_for('admin.definir_senha_mentorado', id=registro.id) }}" class="btn btn-warning">
-            <i class="bi bi-key-fill"></i> Definir Senha
-        </a>
+        <!-- O botão só aparece se o status NÃO for 'Matriculado' -->
+        {% if registro.status != 'Matriculado' %}
+        <form action="{{ url_for('admin.matricular_aluno', id=registro.id) }}" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-success"><i class="bi bi-check-circle-fill"></i> Confirmar Matrícula</button>
+        </form>
         {% endif %}
-        
-        <a href="{{ url_for('main.index') }}" class="btn btn-primary"><i class="bi bi-arrow-left"></i> Voltar para a Lista</a>
+        <a href="{{ url_for('admin.definir_senha_mentorado', id=registro.id) }}" class="btn btn-warning"><i class="bi bi-key-fill"></i> Definir Senha</a>
+        <a href="{{ url_for('admin.admin_lista_inscricoes') }}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar para a Lista</a>
     </div>
-    
 </div>
 {% endblock %}

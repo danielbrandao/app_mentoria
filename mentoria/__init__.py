@@ -27,6 +27,14 @@ def create_app(config_class=Config):
     # Carrega as configurações do ficheiro config.py
     app.config.from_object(config_class)
 
+    # Adiciona as configurações de upload diretamente na criação da app
+    # para garantir que elas estejam sempre disponíveis.
+    app.config['UPLOAD_FOLDER'] = os.path.join(
+        os.path.abspath(os.path.join(os.path.dirname(__file__), '..')), 
+        'mentoria', 'static', 'img', 'uploads'
+    )
+    app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
     # Associa as extensões à nossa aplicação
     db.init_app(app)
     migrate.init_app(app, db)

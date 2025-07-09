@@ -43,9 +43,9 @@
                 <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Sessões com especialistas na área</div>
                 <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Comunidade exclusiva de programadores</div>
             </div>
-            <button onclick="openFormModal('dev')" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 text-center">
-                Escolher DEV+
-            </button>
+            <a href="{{ url_for('main.inscricao_dev') }}" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold py-4 px-6 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 text-center mt-auto">
+                Inscrição DEV+
+            </a>
         </div>
 
         <!-- Card 2: Formação IA para Educadores -->
@@ -69,9 +69,9 @@
                 <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Certificação inclusa</div>
                 <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Acesso às atualizações durante 12 meses</div>
             </div>
-            <button onclick="openFormModal('ia-edu')" class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 text-center">
-                Escolher Formação
-            </button>
+            <a href="{{ url_for('main.formulario_interesse_educadores') }}" class="w-full bg-gradient-to-r from-green-500 to-teal-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-green-600 hover:to-teal-600 transition-all duration-300 transform hover:scale-105 text-center mt-auto">
+                Escolher Formação IA.edu
+            </a>
         </div>
 
         <!-- Card 3: Mentoria IA.edu -->
@@ -90,9 +90,9 @@
                 <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Preparação para aulas e práticas em didática</div>
                 <div class="flex items-center text-gray-700"><i class="bi bi-check-circle-fill text-green-500 me-3"></i>Comunidade exclusiva de educadores</div>
             </div>
-            <button onclick="openFormModal('ia-edu')" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 text-center">
-                Escolher IA.edu
-            </button>
+            <a href="{{ url_for('main.formulario_interesse_educadores') }}" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-semibold py-4 px-6 rounded-xl hover:from-yellow-600 hover:to-orange-600 transition-all duration-300 transform hover:scale-105 text-center mt-auto">
+                Escolher Mentoria IA.edu
+            </a>
         </div>
     </div>
 </main>
