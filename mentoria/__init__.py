@@ -42,6 +42,11 @@ def create_app(config_class=Config):
 
     mail.init_app(app) # Associe o mail à sua aplicação
 
+    from . import commands
+    app.cli.add_command(commands.create_admin_command)
+    app.cli.add_command(commands.init_data_command) # <-- ADICIONE ESTA LINHA
+
+
 
     # Regista os Blueprints
     from mentoria.main.routes import main as main_blueprint
