@@ -11,8 +11,24 @@ class Config:
     # Lê a SECRET_KEY do ambiente, com um valor padrão por segurança
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'fallback-secret-key'
 
+    a versão:
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+class Config:
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'fallback-secret-key'
+
+    # LÓGICA ATUALIZADA: Usa o DATABASE_URL se ele existir (na Render), senão, usa o ficheiro sqlite3 local.
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
         'sqlite:///' + os.path.join(basedir, 'aplicacao.db')
+
+    # Versão anterior do BD local
+    #SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+    #    'sqlite:///' + os.path.join(basedir, 'aplicacao.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # --- CONFIGURAÇÕES DE E-MAIL LIDAS DO AMBIENTE ---
